@@ -8,7 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400&family=Inter:wght@300;400&display=swap" rel="stylesheet">
 <style>
 :root{
-  /* Layout: wordmark alone top-left; five product tiles in one row; then a 320px form column beside the mirror or the agent's working, which takes the rest of the width. */
+  /* Layout: wordmark alone top-left; product tiles five to a row; then a 320px form column beside the mirror or the agent's working, which takes the rest of the width. */
   --canvas:#ffffff;
   --ink:#000000;
   --stone:#757575;
@@ -114,6 +114,14 @@ details .inner{display:grid;gap:12px;padding-top:12px}
 .totals{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 20px}
 .totals dt{font-size:var(--t-cap);text-transform:uppercase;color:var(--stone);padding-top:2px}
 .done{border:1px solid var(--ink);padding:16px;display:grid;gap:12px}
+.thumbs{display:flex;gap:12px;flex-wrap:wrap}
+.thumbs li{width:72px;display:grid;gap:4px;align-content:start;font-size:var(--t-cap);text-transform:uppercase;color:var(--stone)}
+.thumbs img{display:block;width:72px;height:96px;object-fit:cover;object-position:top;background:#f1f0ee}
+.bars{display:grid;gap:12px;max-width:420px}
+.bars li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 12px;text-transform:uppercase;font-variant-numeric:tabular-nums}
+.bars .line{grid-column:1/-1;height:1px;background:var(--ink);width:0}
+.bars li.low{color:var(--stone)}
+.bars li.low .line{background:var(--stone)}
 
 .about{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--gap) var(--section)}
 .about div{display:grid;gap:12px;align-content:start}
@@ -155,7 +163,7 @@ footer{margin-top:var(--section);border-top:1px solid var(--ink);padding-top:12p
 <section id="collection" aria-labelledby="h-col">
   <div class="sec-head">
     <h2 id="h-col">New in</h2>
-    <p class="stone">5 PIECES</p>
+    <p class="stone" id="grid-count"></p>
   </div>
   <ul class="grid" id="grid"></ul>
 </section>
@@ -185,9 +193,10 @@ footer{margin-top:var(--section);border-top:1px solid var(--ink);padding-top:12p
         <label class="field" for="in-height"><span>Height (cm)</span>
           <input type="number" id="in-height" min="140" max="215" step="1" value="178" inputmode="numeric">
         </label>
-        <label class="field" for="in-top"><span>Usual top size</span>
+        <label class="field" for="in-top"><span>Usual size</span>
           <select id="in-top"></select>
         </label>
+        <p class="help">This demo uses one XS to XXL scale for tops and trousers.</p>
       </div>
 
       <div class="step">
@@ -253,12 +262,27 @@ footer{margin-top:var(--section);border-top:1px solid var(--ink);padding-top:12p
 <section id="stylist" aria-labelledby="h-sty">
   <div class="sec-head">
     <h2 id="h-sty">Stylist</h2>
-    <p class="stone">AN AGENT PLANS THE OUTFIT. YOU APPROVE IT.</p>
+    <p class="stone">AN AGENT READS YOUR STYLE AND PLANS THE OUTFIT. YOU APPROVE IT.</p>
   </div>
   <div class="split">
     <div class="form">
       <div class="step">
-        <h3><span class="n">01</span>Your brief</h3>
+        <h3><span class="n">01</span>Your style</h3>
+        <div class="row">
+          <label class="btn" for="style-input" id="style-btn" tabindex="0" role="button">Add style photos</label>
+          <input type="file" id="style-input" class="file-input" accept="image/*" multiple>
+          <button type="button" class="link" id="style-remove" hidden>Remove style photos</button>
+        </div>
+        <ul class="thumbs" id="style-thumbs" hidden></ul>
+        <p class="help">Add up to six photos of outfits you like to wear. A small AI model reads them inside this browser. They are not uploaded anywhere and are not kept.</p>
+        <button type="button" class="btn" id="style-read" disabled>Read my style</button>
+        <p class="status" id="style-status" role="status" aria-live="polite"></p>
+        <label class="field" for="in-style"><span>Style to match</span>
+          <select id="in-style"></select>
+        </label>
+      </div>
+      <div class="step">
+        <h3><span class="n">02</span>Your brief</h3>
         <label class="field" for="in-occasion"><span>Occasion</span>
           <select id="in-occasion"></select>
         </label>
@@ -273,6 +297,16 @@ footer{margin-top:var(--section);border-top:1px solid var(--ink);padding-top:12p
       </div>
     </div>
     <div class="sty-out">
+      <div class="block">
+        <h3>Your style</h3>
+        <p class="help" id="style-empty"></p>
+        <ul class="bars" id="style-bars" hidden></ul>
+        <p class="help" id="style-note" hidden></p>
+      </div>
+      <div class="block" id="sugg" hidden>
+        <h3>Suggested for your style</h3>
+        <ul class="outfit" id="sugg-items"></ul>
+      </div>
       <div class="block">
         <h3>What the agent did</h3>
         <ol class="trace" id="trace"></ol>
@@ -307,21 +341,21 @@ footer{margin-top:var(--section);border-top:1px solid var(--ink);padding-top:12p
   <div class="about">
     <div>
       <h3>What runs live</h3>
-      <p>Three AI models. A try-on model generates a new image of you wearing the piece. An image-editing model redraws that image looser or tighter when you pick another size. A video model turns a look into a short runway clip. Everything you make is kept in this browser, so it reopens at once.</p>
+      <p>Four AI models. A try-on model generates a new image of you wearing the piece. An image-editing model redraws that image looser or tighter when you pick another size. A video model turns a look into a short runway clip. A small image-and-text model reads your style photos inside this browser and scores them against four styles. Everything you make is kept in this browser, so it reopens at once.</p>
     </div>
     <div>
       <h3>What is simulated</h3>
-      <p>Stock, prices, delivery, fit data and return-risk figures are invented to show the idea. The stylist follows written rules where a real agent would reason with a language model over Next's live catalogue, stock and order systems. Size images are AI illustrations of looser and tighter fits. They are not measured from the garment.</p>
+      <p>Stock, prices, delivery, fit data and return-risk figures are invented to show the idea. The stylist follows written rules where a real agent would reason with a language model over Next's live catalogue, stock and order systems. Each piece is tagged by hand with the styles it suits. A retailer would learn that from what shoppers buy, keep and send back. Size images are AI illustrations of looser and tighter fits. They are not measured from the garment.</p>
     </div>
     <div>
       <h3>Your photo</h3>
-      <p>The photo and the images made from it go from this browser to public AI demo servers on Hugging Face and nowhere else. This page has no server of its own. Results are stored only in this browser, and Remove photo deletes them. Saved and shared images carry an AI-generated label.</p>
+      <p>The photo and the images made from it go from this browser to public AI demo servers on Hugging Face and nowhere else. This page has no server of its own. Results are stored only in this browser, and Remove photo deletes them. Saved and shared images carry an AI-generated label. Style photos never leave this browser: the model that reads them is downloaded once and runs on your device, and only the four style scores are kept.</p>
     </div>
   </div>
   <div class="credits">
     <h3>Credits</h3>
     <ul id="credits"></ul>
-    <p class="help">Product photographs are free to use under the Pexels licence. Images and clips are generated by open models published on Hugging Face.</p>
+    <p class="help">Product photographs are free to use under the Pexels licence. Images and clips are generated by open models published on Hugging Face. The style model is licensed by Apple for research use only, so a live service would need a commercially licensed model.</p>
   </div>
 </section>
 
@@ -337,28 +371,51 @@ const GRADIO_URL = 'https://cdn.jsdelivr.net/npm/@gradio/client@2.8.0/dist/index
 const TOP_SIZES = ['XS','S','M','L','XL','XXL'];
 const OCCASIONS = {smart:'Smart casual', weekend:'Weekend casual', cold:'Cold day layers'};
 /* crop = [left, top, right, bottom] as fractions of the stock photograph: the part shown on the tile and sent to the model.
-   runs = illustrative fit data: +1 runs small (size up), -1 runs large (size down). stock = illustrative units per size. */
+   runs = illustrative fit data: +1 runs small (size up), -1 runs large (size down). stock = illustrative units per size.
+   occ and style = hand-written scores from 0 to 3 for how well the piece suits each occasion and each style.
+   cat and photo tell the try-on model what kind of garment and photograph it is. noTry = the try-on model cannot dress it. */
 const ITEMS = [
-  {id:'tee',     name:'Cotton Crew T-Shirt',   colour:'White',      price:12, ease:10, runs:0,  role:'base',  occ:{weekend:3,smart:1,cold:2}, stock:{XS:6,S:9,M:12,L:10,XL:7,XXL:3},
+  {id:'tee',     name:'Cotton Crew T-Shirt',   short:'T-shirt',     colour:'White',      price:12, ease:10, runs:0,  role:'base',  occ:{weekend:3,smart:1,cold:2},       style:{tailored:0,smart:1,casual:3,street:2}, stock:{XS:6,S:9,M:12,L:10,XL:7,XXL:3},
    pexels:12039633, by:'mockupbee',          page:'https://www.pexels.com/photo/white-t-shirt-on-white-surface-12039633/',             crop:[0.2,0.04,0.87,0.96],  desc:'white short-sleeved crew-neck T-shirt'},
-  {id:'shirt',   name:'Linen Grandad Shirt',   colour:'Ecru',       price:34, ease:14, runs:0,  role:'base',  occ:{weekend:2,smart:3,cold:2}, stock:{XS:0,S:4,M:6,L:5,XL:2,XXL:1},
+  {id:'shirt',   name:'Linen Grandad Shirt',   short:'Linen shirt', colour:'Ecru',       price:34, ease:14, runs:0,  role:'base',  occ:{weekend:2,smart:3,cold:2},       style:{tailored:1,smart:3,casual:2,street:0}, stock:{XS:0,S:4,M:6,L:5,XL:2,XXL:1},
    pexels:22441297, by:'dayong tien',        page:'https://www.pexels.com/photo/shirt-on-hanger-on-branch-22441297/',                  crop:[0,0.16,1,1],          desc:'ecru linen shirt with a grandad collar'},
-  {id:'hoodie',  name:'Brushed Cotton Hoodie', colour:'Dusty pink', price:32, ease:16, runs:1,  role:'mid',   occ:{weekend:3,smart:0,cold:3}, stock:{XS:3,S:5,M:0,L:4,XL:6,XXL:0},
+  {id:'poplin',  name:'Cotton Poplin Shirt',   short:'Poplin shirt',colour:'White',      price:24, ease:12, runs:0,  role:'base',  occ:{weekend:1,smart:3,cold:1.5},     style:{tailored:3,smart:2,casual:1,street:0}, stock:{XS:3,S:6,M:8,L:7,XL:4,XXL:2}, collar:true,
+   pexels:28576622, by:'Jonathan Borba',     page:'https://www.pexels.com/photo/minimalist-white-shirt-hanging-on-hanger-28576622/',   crop:[0,0,1,1],             desc:'white collared cotton shirt'},
+  {id:'hoodie',  name:'Brushed Cotton Hoodie', short:'Hoodie',      colour:'Dusty pink', price:32, ease:16, runs:1,  role:'mid',   occ:{weekend:3,smart:0,cold:3},       style:{tailored:0,smart:0,casual:2,street:3}, stock:{XS:3,S:5,M:0,L:4,XL:6,XXL:0},
    pexels:6786666,  by:'Artem Podrez',       page:'https://www.pexels.com/photo/a-person-holding-a-brown-hoodie-6786666/',             crop:[0.02,0.3,1,0.97],     desc:'dusty pink pullover hoodie', wear:'worn over'},
-  {id:'cardigan',name:'Chunky Knit Cardigan',  colour:'Red',        price:45, ease:14, runs:-1, role:'mid',   occ:{weekend:2,smart:3,cold:3}, stock:{XS:2,S:0,M:5,L:3,XL:2,XXL:1},
+  {id:'cardigan',name:'Chunky Knit Cardigan',  short:'Cardigan',    colour:'Red',        price:45, ease:14, runs:-1, role:'mid',   occ:{weekend:2,smart:3,cold:3},       style:{tailored:1,smart:3,casual:1,street:0}, stock:{XS:2,S:0,M:5,L:3,XL:2,XXL:1},
    pexels:36129313, by:'Polina Chistyakova', page:'https://www.pexels.com/photo/bright-red-knit-cardigan-on-hanger-display-36129313/', crop:[0.03,0.04,0.97,0.98], desc:'red chunky knit cardigan with buttons', wear:'worn open over'},
-  {id:'jacket',  name:'Denim Chore Jacket',    colour:'Indigo',     price:55, ease:18, runs:0,  role:'outer', occ:{weekend:3,smart:2,cold:2}, stock:{XS:1,S:3,M:2,L:4,XL:3,XXL:1},
-   pexels:16428734, by:'James Frid',         page:'https://www.pexels.com/photo/denim-jacket-in-midair-16428734/',                     crop:[0.2,0.1,0.85,0.72],   desc:'indigo denim jacket', wear:'worn open over'}
+  {id:'jacket',  name:'Denim Chore Jacket',    short:'Denim jacket',colour:'Indigo',     price:55, ease:18, runs:0,  role:'outer', occ:{weekend:3,smart:2,cold:2},       style:{tailored:0,smart:1,casual:3,street:2}, stock:{XS:1,S:3,M:2,L:4,XL:3,XXL:1},
+   pexels:16428734, by:'James Frid',         page:'https://www.pexels.com/photo/denim-jacket-in-midair-16428734/',                     crop:[0.2,0.1,0.85,0.72],   desc:'indigo denim jacket', wear:'worn open over'},
+  {id:'blazer',  name:'Tailored Suit Jacket',  short:'Suit jacket', colour:'Sage',       price:65, ease:12, runs:0,  role:'outer', occ:{weekend:0.5,smart:3,cold:2},     style:{tailored:3,smart:2,casual:0,street:0}, stock:{XS:1,S:2,M:3,L:3,XL:2,XXL:0},
+   pexels:37524688, by:'Alexander Mass',     page:'https://www.pexels.com/photo/elegant-beige-suit-jacket-hanging-on-rustic-wall-37524688/', crop:[0,0,1,1],       desc:'sage tailored suit jacket', wear:'worn open over'},
+  {id:'trousers',name:'Tailored Trousers',     short:'Trousers',    colour:'Brown',      price:35, ease:6,  runs:0,  role:'bottom',occ:{weekend:1.5,smart:2.5,cold:2},   style:{tailored:3,smart:2,casual:1,street:0}, stock:{XS:2,S:4,M:5,L:4,XL:2,XXL:1}, cat:'bottoms', photo:'model',
+   pexels:39457749, by:'Engin Akyurt',       page:'https://www.pexels.com/photo/stylish-brown-trousers-on-white-background-39457749/', crop:[0,0,1,1],             desc:'brown tailored trousers'},
+  {id:'tie',     name:'Patterned Tie',         short:'Tie',         colour:'Blue',       price:14, ease:0,  runs:0,  role:'acc',   occ:{weekend:0,smart:1.5,cold:0.5},   style:{tailored:3,smart:1,casual:0,street:0}, stock:{ONE:14}, oneSize:true, noTry:true,
+   pexels:45055,    by:'Dom J',              page:'https://www.pexels.com/photo/blue-necktie-on-white-surface-45055/',                 crop:[0,0,1,1],             desc:'blue patterned necktie', wear:'knotted at the shirt collar'}
 ];
 const BY_ID = Object.fromEntries(ITEMS.map(i => [i.id, i]));
+const WEARABLE = ITEMS.filter(i => !i.noTry);
+
+/* Style reading. A small image-and-text model (CLIP family) runs inside the browser through Transformers.js.
+   It scores each style photo against the sentences below. Nothing is uploaded. */
+const TF_URL = 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.7.6/dist/transformers.min.js';
+const STYLE_MODEL = {id:'Xenova/mobileclip_s0', label:'MobileCLIP S0', mb:55};
+const STYLES = {
+  tailored:{label:'Tailored',       prompts:['a photo of a person wearing a suit and tie','a photo of a person in formal tailoring, a suit jacket and smart trousers','a photo of a person dressed formally for the office or a wedding']},
+  smart:   {label:'Smart casual',   prompts:['a photo of a person in smart casual clothes','a photo of a person wearing an open-collar shirt with chinos','a photo of a person wearing a knitted cardigan or jumper over a shirt']},
+  casual:  {label:'Relaxed casual', prompts:['a photo of a person in casual everyday clothes','a photo of a person wearing a plain t-shirt and jeans','a photo of a person wearing a denim jacket and jeans']},
+  street:  {label:'Streetwear',     prompts:['a photo of a person in streetwear','a photo of a person wearing a hoodie and joggers','a photo of a person wearing a tracksuit and trainers']}
+};
+const STYLE_KEYS = Object.keys(STYLES);
 
 /* Free AI models hosted as Hugging Face Spaces. */
 const TRYON = [
   {id:'fashn', label:'FASHN VTON 1.5', space:'fashn-ai/fashn-vton-1.5',
-    run:(app,file,person,garment)=>app.predict('/try_on',{person_image:file(person),garment_image:file(garment),category:'tops',garment_photo_type:'flat-lay',num_timesteps:50,guidance_scale:1.5,seed:42,segmentation_free:true}).then(r=>r.data[0])},
+    run:(app,file,person,garment,item)=>app.predict('/try_on',{person_image:file(person),garment_image:file(garment),category:item.cat||'tops',garment_photo_type:item.photo||'flat-lay',num_timesteps:50,guidance_scale:1.5,seed:42,segmentation_free:true}).then(r=>r.data[0])},
   {id:'leffa', label:'Leffa', space:'franciszzj/Leffa',
-    run:(app,file,person,garment)=>app.predict('/leffa_predict_vt',{src_image_path:file(person),ref_image_path:file(garment),ref_acceleration:'False',step:30,scale:2.5,seed:42,vt_model_type:'viton_hd',vt_garment_type:'upper_body',vt_repaint:'False'}).then(r=>r.data[0])},
-  {id:'idm', label:'IDM-VTON', space:'yisol/IDM-VTON',
+    run:(app,file,person,garment,item)=>app.predict('/leffa_predict_vt',{src_image_path:file(person),ref_image_path:file(garment),ref_acceleration:'False',step:30,scale:2.5,seed:42,vt_model_type:'viton_hd',vt_garment_type:item.cat==='bottoms'?'lower_body':'upper_body',vt_repaint:'False'}).then(r=>r.data[0])},
+  {id:'idm', label:'IDM-VTON', space:'yisol/IDM-VTON', topsOnly:true,
     run:(app,file,person,garment,item)=>app.predict('/tryon',{dict:{background:file(person),layers:[],composite:null},garm_img:file(garment),garment_des:item.desc,is_checked:true,is_checked_crop:true,denoise_steps:30,seed:42}).then(r=>r.data[0])}
 ];
 /* image editors: inputs in order are prompt, images, mode, seed, random seed, width, height, steps, guidance, prompt upsampling */
@@ -375,6 +432,12 @@ const FIT_PHRASE = {
   '-1':'one size too small: snug and close to the body across the chest, shoulders and stomach, with the sleeves and the hem slightly shorter',
   '-2':'two sizes too small: tight, with the fabric stretched across the chest and stomach and showing pull lines, the shoulder seams sitting too high, clearly short sleeves, and the hem riding up at the waist'
 };
+const FIT_PHRASE_LOW = {
+  '2':'two sizes too big: clearly baggy, with spare fabric gathered at the waist, a low loose seat, wide legs and the hems pooling over the shoes',
+  '1':'one size too big: slightly loose at the waist and seat, with a little extra width in the leg and the hems slightly longer',
+  '-1':'one size too small: snug at the waist, seat and thighs, with the hems sitting slightly higher at the ankle',
+  '-2':'two sizes too small: tight, with the fabric stretched across the waist, hips and thighs and showing pull lines, and the hems ending clearly above the ankle'
+};
 
 const state = {
   photo:null,                  // {blob,url,hash,name}
@@ -382,7 +445,10 @@ const state = {
   height:178, top:'M', override:{},
   looks:{},                    // key -> {url, blob, model, seconds, clip:{url,blob,model}}
   showOriginal:false, playClip:false, busy:false, model:'auto',
-  occasion:'smart', budget:80, planIndex:0, plan:null, approved:false
+  occasion:'smart', budget:80, planIndex:0, plan:null, approved:false,
+  styleMode:'auto',            // 'auto' = from the photos, 'none' = occasion only, or one of the STYLES keys chosen by hand
+  styleRead:null,              // {profile:{style:share}, n, model} from the last reading; only these numbers are stored
+  stylePhotos:[], styleBusy:false   // [{canvas,url,probs}] held in memory only
 };
 
 /* ---------------------------------------------------------------- helpers */
@@ -391,6 +457,7 @@ const idx = s => TOP_SIZES.indexOf(s);
 const clamp = (v,lo,hi) => Math.min(hi,Math.max(lo,v));
 function el(tag,attrs,text){const n=document.createElement(tag);if(attrs)for(const k in attrs){if(k==='class')n.className=attrs[k];else n.setAttribute(k,attrs[k]);}if(text!==undefined)n.textContent=text;return n;}
 function setStatus(t){$('status').textContent=t||'';}
+function listAnd(a){return a.length>1?a.slice(0,-1).join(', ')+' and '+a[a.length-1]:(a[0]||'');}
 function errText(e){if(!e)return'';if(typeof e==='string')return e;return String(e.message||e.title||e.detail||e.error||e);}
 const store={
   get(k){try{return localStorage.getItem(k);}catch(e){return null;}},
@@ -455,18 +522,18 @@ function sizeOf(item){return state.override[item.id]||recSize(item);}
 function netEase(item,size){return item.ease+5*(idx(size)-idx(state.top)-item.runs);}
 function stepsFromRec(item,size){return idx(size)-idx(recSize(item));}
 function verdictOf(item,size){
-  const e=item.ease, net=netEase(item,size);
-  if(net<4) return {code:'tight',label:'Too tight',line:(net<=0?'No room':'Only '+net+' cm of room')+' at the chest. Expect pulling across the chest and shoulders.'};
-  if(net<e-2.5) return {code:'close',label:'Close fit',line:net+' cm of room at the chest, '+(e-net)+' cm less than designed.'};
-  if(net<=e+2.5) return {code:'regular',label:'Regular fit',line:net+' cm of room at the chest, as designed.'};
-  if(net<=e+7.5) return {code:'relaxed',label:'Relaxed fit',line:net+' cm of room at the chest, '+(net-e)+' cm more than designed. The shoulder seam drops slightly.'};
-  return {code:'over',label:'Oversized',line:net+' cm of room at the chest, '+(net-e)+' cm more than designed.'};
+  const e=item.ease, net=netEase(item,size), low=item.cat==='bottoms', at=' at the '+(low?'waist':'chest');
+  if(net<4) return {code:'tight',label:'Too tight',line:(net<=0?'No room':'Only '+net+' cm of room')+at+'. Expect pulling across the '+(low?'seat and thighs':'chest and shoulders')+'.'};
+  if(net<e-2.5) return {code:'close',label:'Close fit',line:net+' cm of room'+at+', '+(e-net)+' cm less than designed.'};
+  if(net<=e+2.5) return {code:'regular',label:'Regular fit',line:net+' cm of room'+at+', as designed.'};
+  if(net<=e+7.5) return {code:'relaxed',label:'Relaxed fit',line:net+' cm of room'+at+', '+(net-e)+' cm more than designed. '+(low?'It sits lower on the hips.':'The shoulder seam drops slightly.')};
+  return {code:'over',label:'Oversized',line:net+' cm of room'+at+', '+(net-e)+' cm more than designed.'};
 }
 function riskOf(item,size){
   const d=Math.abs(stepsFromRec(item,size));
   return d===0?{label:'Low',keep:'9 in 10'}:d===1?{label:'Medium',keep:'6 in 10'}:{label:'High',keep:'2 in 10'};
 }
-function runsText(item){return item.runs>0?'Runs small':item.runs<0?'Runs large':'True to size';}
+function runsText(item){return item.oneSize?'One size':item.runs>0?'Runs small':item.runs<0?'Runs large':'True to size';}
 
 /* ---------------------------------------------------------------- looks */
 function itemKey(item,size){const d=clamp(stepsFromRec(item,size),-2,2); return item.id+'|'+(d===0?'base':'d'+d);}
@@ -478,7 +545,7 @@ function saveLook(key,r){
   const old=state.looks[key];
   if(old){ if(old.blob) URL.revokeObjectURL(old.url); if(old.clip) URL.revokeObjectURL(old.clip.url); looksDb.del(state.photo.hash+'|'+key+'|clip'); }
   state.looks[key]=r;
-  if(r.blob) looksDb.put(state.photo.hash+'|'+key,{blob:r.blob,model:r.model,seconds:r.seconds});
+  if(r.blob) looksDb.put(state.photo.hash+'|'+key,{blob:r.blob,model:r.model,seconds:r.seconds,note:r.note||''});
 }
 function dropLook(key){
   const old=state.looks[key]; if(!old) return;
@@ -494,11 +561,12 @@ function renderGrid(){
     const li=el('li',{class:'card'});
     const ph=el('img',{class:'ph',src:pexelsUrl(item.pexels,800),alt:item.colour+' '+item.name.toLowerCase(),style:'object-position:'+focus(item)});
     ph.addEventListener('error',()=>offline('photos'),{once:true});
-    const b=el('button',{type:'button',class:'btn'},'Try it on');
-    b.addEventListener('click',()=>{selectItem(item.id); $('fitting-room').scrollIntoView({block:'start'}); if(state.photo) actTryOn(false);});
+    const b=el('button',{type:'button',class:'btn'},item.noTry?'Ask the stylist':'Try it on');
+    b.addEventListener('click',()=>{ if(item.noTry){$('stylist').scrollIntoView({block:'start'}); return;} goTry(item.id); });
     li.append(ph,el('p',{class:'name'},item.name),el('p',{class:'meta'},item.colour+' · £'+item.price),el('p',{class:'data'},runsText(item)),b);
     grid.append(li);
   }
+  $('grid-count').textContent=ITEMS.length+' PIECES';
   const cr=$('credits');
   for(const item of ITEMS){
     const li=el('li'); li.append(document.createTextNode(item.name+': photograph by '+item.by+' on '));
@@ -508,10 +576,13 @@ function renderGrid(){
     const li=el('li'); li.append(document.createTextNode(what+': '+m.label+', '));
     li.append(el('a',{href:'https://huggingface.co/spaces/'+m.space,rel:'noopener'},'huggingface.co/spaces/'+m.space)); cr.append(li);
   }
+  const li=el('li'); li.append(document.createTextNode('Style reading model: '+STYLE_MODEL.label+' by Apple, run in the browser with Transformers.js, '));
+  li.append(el('a',{href:'https://huggingface.co/'+STYLE_MODEL.id,rel:'noopener'},'huggingface.co/'+STYLE_MODEL.id)); cr.append(li);
 }
+function goTry(id){selectItem(id); $('fitting-room').scrollIntoView({block:'start'}); if(state.photo) actTryOn(false);}
 function renderPieces(){
   const ul=$('pieces'); ul.textContent='';
-  for(const item of ITEMS){
+  for(const item of WEARABLE){
     const li=el('li'), lab=el('label');
     const inp=el('input',{type:'radio',name:'piece',value:item.id,id:'piece-'+item.id});
     inp.checked=state.view==='item'&&state.item===item.id;
@@ -526,7 +597,7 @@ function renderFit(){
     box.append(el('p',null,'Outfit from the stylist'));
     for(const id of state.outfit){
       const item=BY_ID[id], p=resolvePiece(item)||{size:recSize(item)};
-      box.append(el('p',{class:'help'},item.name+', size '+p.size+': '+verdictOf(item,p.size).label.toLowerCase()+'.'));
+      box.append(el('p',{class:'help'},item.oneSize?item.name+', one size.'+(item.noTry?' The try-on model cannot dress it, so the image editor draws it when it can.':''):item.name+', size '+p.size+': '+verdictOf(item,p.size).label.toLowerCase()+'.'));
     }
     const back=el('button',{type:'button',class:'link'},'Back to single pieces');
     back.addEventListener('click',()=>selectItem(state.item));
@@ -542,9 +613,10 @@ function renderFit(){
     sz.append(b);
   }
   box.append(sz,el('p',{class:'verdict'},v.label),el('p',{class:'help'},v.line));
-  if(d!==0) box.append(el('p',{class:'help'},'Body '+Math.abs(1.5*d)+' cm '+(d>0?'longer':'shorter')+' and sleeves '+Math.abs(d)+' cm '+(d>0?'longer':'shorter')+' than your recommended size.'));
-  if(state.height>=188) box.append(el('p',{class:'help'},'At '+state.height+' cm, body and sleeves may sit short. Choose a Tall length where one is offered.'));
-  else if(state.height<=167) box.append(el('p',{class:'help'},'At '+state.height+' cm, body and sleeves may run long.'));
+  const low=item.cat==='bottoms';
+  if(d!==0) box.append(el('p',{class:'help'},low?'Leg '+Math.abs(d)+' cm '+(d>0?'longer':'shorter')+' than your recommended size.':'Body '+Math.abs(1.5*d)+' cm '+(d>0?'longer':'shorter')+' and sleeves '+Math.abs(d)+' cm '+(d>0?'longer':'shorter')+' than your recommended size.'));
+  if(state.height>=188) box.append(el('p',{class:'help'},'At '+state.height+' cm, '+(low?'the leg may sit short. Choose a Long leg where one is offered.':'body and sleeves may sit short. Choose a Tall length where one is offered.')));
+  else if(state.height<=167) box.append(el('p',{class:'help'},'At '+state.height+' cm, '+(low?'the leg may run long. Choose a Short leg where one is offered.':'body and sleeves may run long.')));
   box.append(el('p',{class:'verdict'},'Return risk: '+risk.label));
   box.append(el('p',{class:'help'},'About '+risk.keep+' shoppers with your size and height keep this piece in '+size+'. Illustrative figure.'));
   box.append(el('p',{class:'help'},'Recommended for you: '+rec+'.'+(item.runs!==0?' This piece runs '+(item.runs>0?'small':'large')+', so that is one '+(item.runs>0?'up':'down')+' from your usual '+state.top+'.':'')));
@@ -558,14 +630,14 @@ function renderLooks(){
     const li=el('li'), b=el('button',{type:'button','aria-pressed':String(on)});
     b.append(el('img',{src:r.url,alt:''}),el('span',null,label)); b.addEventListener('click',go); li.append(b); ul.append(li);
   };
-  for(const item of ITEMS) add(item.id+'|base',item.name.split(' ').slice(-1)[0],state.view==='item'&&state.item===item.id,()=>selectItem(item.id));
+  for(const item of WEARABLE) add(item.id+'|base',item.short,state.view==='item'&&state.item===item.id,()=>selectItem(item.id));
   for(const key in state.looks) if(key.startsWith('outfit|')){
     const ids=key.slice(7).split('+').filter(i=>BY_ID[i]); if(!ids.length) continue;
     add(key,'Outfit',state.view==='outfit'&&state.outfit&&state.outfit.join('+')===ids.join('+'),()=>{state.view='outfit'; state.outfit=ids; state.showOriginal=false; state.playClip=false; syncAll();});
   }
 }
 function lookName(){
-  if(state.view==='outfit'&&state.outfit){const n=state.outfit.map(i=>BY_ID[i].name); return 'the '+(n.length>1?n.slice(0,-1).join(', ')+' and '+n[n.length-1]:n[0]);}
+  if(state.view==='outfit'&&state.outfit) return 'the '+listAnd(state.outfit.map(i=>BY_ID[i].name));
   return 'the '+BY_ID[state.item].name;
 }
 function syncMirror(){
@@ -575,7 +647,7 @@ function syncMirror(){
   let cap='', showVideo=false;
   if(state.photo&&look&&!state.showOriginal){
     if(look.clip&&state.playClip){showVideo=true; if(vid.src!==look.clip.url){vid.src=look.clip.url;} cap='Runway clip of you in '+lookName()+'. Generated by AI.';}
-    else{img.src=look.url; img.alt='You wearing '+lookName(); cap=(state.view==='item'?'You in '+lookName()+', size '+size+'. ':'You in '+lookName()+'. ')+(d!==0?'AI illustration of this fit.':'Generated by AI.');}
+    else{img.src=look.url; img.alt='You wearing '+lookName(); cap=(state.view==='item'?'You in '+lookName()+', size '+size+'. ':'You in '+lookName()+'. ')+(look.note?look.note+' ':'')+(d!==0?'AI illustration of this fit.':'Generated by AI.');}
   }else if(state.photo&&base&&!state.showOriginal){
     img.src=base.url; img.alt='You wearing '+lookName(); cap='Shown in your recommended size '+recSize(item)+'. Press See size '+size+' on me to redraw it.';
   }else if(state.photo){
@@ -601,7 +673,7 @@ function syncMirror(){
   $('photo-remove').hidden=!state.photo;
   for(const id of ['try','plan','prop-try']) $(id).disabled=state.busy;
 }
-function syncAll(){renderPieces(); renderFit(); renderLooks(); syncMirror(); $('sty-size').textContent='Uses your size from the fitting room: '+state.top+', '+state.height+' cm.';}
+function syncAll(){renderPieces(); renderFit(); renderLooks(); syncMirror(); $('sty-size').textContent='Uses your size from the fitting room: '+state.top+', '+state.height+' cm.'; $('style-read').disabled=state.styleBusy||!state.stylePhotos.length;}
 function sizeHint(){
   if(state.busy||state.view!=='item') return;
   const item=BY_ID[state.item], size=sizeOf(item);
@@ -658,7 +730,7 @@ async function loadPhoto(file){
     const parts=String(k2).slice(state.photo.hash.length+1).split('|');
     if(parts[parts.length-1]==='clip'){clips.push([parts.slice(0,-1).join('|'),v]); continue;}
     const key=parts.length===1&&BY_ID[parts[0]]?parts[0]+'|base':parts.join('|');
-    state.looks[key]={blob:v.blob,url:URL.createObjectURL(v.blob),model:v.model,seconds:v.seconds};
+    state.looks[key]={blob:v.blob,url:URL.createObjectURL(v.blob),model:v.model,seconds:v.seconds,note:v.note||''};
   }
   for(const [key,v] of clips) if(state.looks[key]) state.looks[key].clip={blob:v.blob,url:URL.createObjectURL(v.blob),model:v.model};
   state.view='item'; syncAll();
@@ -742,7 +814,8 @@ async function fetchJpeg(remote){
 }
 async function tryOnOnce(item,person,stage){
   const garment=(await loadGarment(item)).blob;
-  const order=state.model==='auto'?TRYON:TRYON.filter(m=>m.id===state.model);
+  let order=state.model==='auto'?TRYON:TRYON.filter(m=>m.id===state.model);
+  if(item.cat==='bottoms'){order=order.filter(m=>!m.topsOnly); if(!order.length) order=TRYON.filter(m=>!m.topsOnly);}
   const r=await callFirst(order,stage,(m,app,file)=>m.run(app,file,person,garment,item));
   const remote=remoteUrl(r.out); if(!remote) throw new Error('no image came back');
   const blob=await fetchJpeg(remote);
@@ -762,7 +835,7 @@ function ready(){
   return true;
 }
 async function busy(expect,fn){
-  const stage={text:'',verb:'Generating',hint:''};
+  const stage={text:'Starting.',verb:'Generating',hint:''};
   state.busy=true; state.showOriginal=false; state.playClip=false; syncAll();
   progress(true,()=>stage.text,expect); setStatus('Working. Keep this tab open.');
   $('mirror-wrap').scrollIntoView({block:'nearest'});
@@ -803,7 +876,7 @@ async function actSize(){
     stage.verb='Redrawing size '+size; stage.hint='Usually under 30 seconds.';
     const bmp=await createImageBitmap(base.blob), k=1024/Math.max(bmp.width,bmp.height);
     const w=clamp(Math.round(bmp.width*k/8)*8,256,1024), h=clamp(Math.round(bmp.height*k/8)*8,256,1024);
-    const prompt='Change only the fit of the '+item.desc+' the person is wearing so that it looks '+FIT_PHRASE[String(d)]+'. Keep the colour, fabric and design of the garment. Keep the person\'s face, hair, body, pose, other clothes, the lighting and the background exactly the same. Photorealistic.';
+    const prompt='Change only the fit of the '+item.desc+' the person is wearing so that it looks '+(item.cat==='bottoms'?FIT_PHRASE_LOW:FIT_PHRASE)[String(d)]+'. Keep the colour, fabric and design of the garment. Keep the person\'s face, hair, body, pose, other clothes, the lighting and the background exactly the same. Photorealistic.';
     const r=await callFirst(EDITORS,stage,(m,app,file)=>app.predict(m.ep,[prompt,[{image:file(base.blob),caption:null}],'Distilled (4 steps)',42,false,w,h,4,1,false]).then(x=>x.data[0]));
     const remote=remoteUrl(r.out); if(!remote) throw new Error('no image came back');
     const blob=await fetchJpeg(remote);
@@ -828,14 +901,17 @@ async function actClip(){
     setStatus('Done. An AI-generated clip of the look moving.');
   }).then(ok=>{if(ok){state.playClip=true; syncAll();}});
 }
-/* the stylist's outfit: the try-on model dresses the first piece, then the image editor layers the rest over it */
-async function layerOutfit(base,pieces,stage){
+/* the stylist's outfit: the try-on model dresses the first top and the trousers, then the image editor layers the rest over them */
+async function layerOutfit(base,under0,layers,stage){
   const bmp=await createImageBitmap(base), k=1024/Math.max(bmp.width,bmp.height);
   const w=clamp(Math.round(bmp.width*k/8)*8,256,1024), h=clamp(Math.round(bmp.height*k/8)*8,256,1024);
-  const garments=[]; for(const p of pieces.slice(1)) garments.push((await loadGarment(p.item)).blob);
-  const parts=[]; let under=pieces[0].item.desc;
-  pieces.slice(1).forEach((p,i)=>{parts.push('the '+p.item.desc+' from image '+(i+2)+', '+(p.item.wear||'worn over')+' the '+under); under=p.item.desc;});
-  const prompt='Dress the person in image 1 in '+parts.join(', and ')+'. Keep the '+pieces[0].item.desc+' they are already wearing visible where it would show. Keep the person\'s face, hair, body, pose, trousers, the lighting and the background exactly the same. Photorealistic.';
+  const garments=[]; for(const p of layers) garments.push((await loadGarment(p.item)).blob);
+  const parts=[]; let under=under0.desc;
+  layers.forEach((p,i)=>{
+    if(p.item.noTry) parts.push('the '+p.item.desc+' from image '+(i+2)+', '+p.item.wear);
+    else{parts.push('the '+p.item.desc+' from image '+(i+2)+', '+(p.item.wear||'worn over')+' the '+under); under=p.item.desc;}
+  });
+  const prompt='Dress the person in image 1 in '+parts.join(', and ')+'. Keep the '+under0.desc+' they are already wearing visible where it would show. Keep the person\'s face, hair, body, pose, trousers, the lighting and the background exactly the same. Photorealistic.';
   const r=await callFirst(EDITORS,stage,(m,app,file)=>app.predict(m.ep,[prompt,[base].concat(garments).map(g=>({image:file(g),caption:null})),'Distilled (4 steps)',42,false,w,h,4,1,false]).then(x=>x.data[0]));
   const remote=remoteUrl(r.out); if(!remote) throw new Error('no image came back');
   const blob=await fetchJpeg(remote);
@@ -848,33 +924,52 @@ async function actOutfit(fresh){
   state.view='outfit'; state.outfit=ids;
   $('mirror-wrap').scrollIntoView({block:'start'});
   if(state.looks[key]&&fresh!==true){syncAll(); setStatus('Showing the outfit made earlier for this photo.'); $('prop-status').textContent=$('status').textContent; return;}
-  await busy(45+25,async stage=>{
-    const firstKey=pcs[0].item.id+'|base'; let first=state.looks[firstKey], secs=0;
-    if(!first||!first.blob){
-      stage.verb='Dressing piece 1 of '+pcs.length; stage.hint='Usually 30 to 60 seconds.';
-      first=await tryOnOnce(pcs[0].item,state.photo.blob,stage); secs+=first.seconds;
-      if(!first.blob) throw new Error('could not pass the image to the next step');
-      saveLook(firstKey,first);
+  const tops=pcs.filter(p=>!p.item.noTry&&p.item.cat!=='bottoms'), lows=pcs.filter(p=>p.item.cat==='bottoms'), extras=pcs.filter(p=>p.item.noTry);
+  const layers=extras.concat(tops.slice(1));      /* the tie goes on before the jacket */
+  const total=1+lows.length+(layers.length?1:0);
+  await busy(45*(1+lows.length)+(layers.length?25:0),async stage=>{
+    const models=[], worn=[]; let secs=0, step=1, stopped=null;
+    const firstKey=tops[0].item.id+'|base'; let cur=state.looks[firstKey], own=false;   /* own = cur is a new image that belongs to this outfit */
+    if(!cur||!cur.blob){
+      stage.verb='Step 1 of '+total+', dressing the '+tops[0].item.short.toLowerCase(); stage.hint='Usually 30 to 60 seconds.';
+      cur=await tryOnOnce(tops[0].item,state.photo.blob,stage); secs+=cur.seconds;
+      if(!cur.blob) throw new Error('could not pass the image to the next step');
+      saveLook(firstKey,cur);
     }
-    let done=null;
+    models.push(cur.model); worn.push(tops[0].item.id);
+    const take=(r,ids)=>{ if(own&&cur.blob) URL.revokeObjectURL(cur.url); cur=r; own=true; secs+=r.seconds; if(models.indexOf(r.model)<0) models.push(r.model); for(const id of ids) worn.push(id); };
+    const dress=async q=>{
+      stage.verb='Step '+step+' of '+total+', dressing the '+q.item.short.toLowerCase(); stage.hint='Usually 30 to 60 seconds.';
+      if(!cur.blob) throw new Error('could not pass the image to the next step');
+      take(await tryOnOnce(q.item,cur.blob,stage),[q.item.id]);
+    };
+    /* from here on a failure keeps what is already drawn and says what is missing */
     try{
-      stage.verb='Layering the outfit'; stage.hint='Usually under 30 seconds.';
-      done=await layerOutfit(first.blob,pcs,stage);
-    }catch(e){
-      if((e&&e.code==='lib')||/quota/i.test(errText(e))) throw e;
-      /* the editor is down: put each remaining piece on with the try-on model instead */
-      let person=first.blob;
-      for(let n=1;n<pcs.length;n++){
-        stage.verb='Dressing piece '+(n+1)+' of '+pcs.length; stage.hint='Usually 30 to 60 seconds.';
-        if(done&&done.blob) URL.revokeObjectURL(done.url);
-        done=await tryOnOnce(pcs[n].item,person,stage);
-        if(n<pcs.length-1&&!done.blob) throw new Error('could not pass the image to the next step');
-        person=done.blob;
+      for(const q of lows){step++; await dress(q);}
+      if(layers.length){
+        step++;
+        try{
+          stage.verb='Step '+step+' of '+total+', layering the outfit'; stage.hint='Usually under 30 seconds.';
+          if(!cur.blob) throw new Error('could not pass the image to the next step');
+          take(await layerOutfit(cur.blob,tops[0].item,layers,stage),layers.map(q=>q.item.id));
+        }catch(e){
+          if(e&&e.code==='lib') throw e;
+          /* the editor is down or out of allowance: put each remaining top on with the try-on model instead. It cannot dress a tie. */
+          stopped=e;
+          for(const q of tops.slice(1)) await dress(q);
+        }
       }
+    }catch(e){
+      if(e&&e.code==='lib') throw e;
+      stopped=e;
     }
-    secs+=done.seconds;
-    saveLook(key,{blob:done.blob,url:done.url,model:done.model,seconds:secs});
-    setStatus('Done. This is an AI-generated image of you in the outfit.');
+    if(worn.length<2&&stopped) throw stopped;
+    const missed=pcs.filter(q=>worn.indexOf(q.item.id)<0).map(q=>q.item.name);
+    const note=missed.length?'The '+listAnd(missed)+' could not be drawn, so '+(missed.length>1?'they are':'it is')+' not shown.':'';
+    saveLook(key,{blob:cur.blob,url:own||!cur.blob?cur.url:URL.createObjectURL(cur.blob),model:listAnd(models),seconds:secs,note});
+    const quota=!!(note&&stopped&&/quota/i.test(errText(stopped)));
+    setStatus('Done. This is an AI-generated image of you in the outfit.'+(note?' '+note+' '+(quota?failureCopy(stopped):'Press Generate a fresh image to try again.'):''));
+    if(quota&&!store.get('fr.hfToken')) $('settings').open=true;
   });
   $('prop-status').textContent=$('status').textContent;
 }
@@ -914,8 +1009,157 @@ async function actShare(){
   }else{download(f); setStatus('This browser cannot share files, so it was saved instead. Sharing works on most phones.');}
 }
 
+/* ---------------------------------------------------------------- style reading (runs inside this browser) */
+function setStyleStatus(t){$('style-status').textContent=t||'';}
+function topStyle(p){return STYLE_KEYS.reduce((a,b)=>p[b]>p[a]?b:a);}
+function styleScore(item,p){let t=0; for(const k of STYLE_KEYS) t+=(p[k]||0)*(item.style[k]||0); return t;}   /* 0 to 3 */
+function activeStyle(){
+  const m=state.styleMode;
+  if(m==='none') return null;
+  if(STYLES[m]){const p={}; for(const k of STYLE_KEYS) p[k]=k===m?1:0; return {profile:p,top:m,how:'chosen by you',manual:true};}
+  const r=state.styleRead; if(!r) return null;
+  return {profile:r.profile,top:topStyle(r.profile),how:'read from '+r.n+' photo'+(r.n===1?'':'s'),manual:false};
+}
+function suggestions(sty){
+  return ITEMS.map(item=>({item,match:styleScore(item,sty.profile)/3}))
+    .sort((a,b)=>b.match-a.match||b.item.price-a.item.price)
+    .filter((x,i)=>i<3||x.match>=0.6).slice(0,4);
+}
+function renderStyle(){
+  const th=$('style-thumbs'); th.textContent=''; th.hidden=!state.stylePhotos.length;
+  state.stylePhotos.forEach((ph,i)=>{
+    const li=el('li'), t=ph.probs?topStyle(ph.probs):null;
+    li.append(el('img',{src:ph.url,alt:'Style photo '+(i+1)}),el('span',null,t?STYLES[t].label+' '+Math.round(ph.probs[t]*100)+'%':'Not read yet'));
+    th.append(li);
+  });
+  $('style-remove').hidden=!(state.stylePhotos.length||state.styleRead);
+  $('style-remove').textContent=state.stylePhotos.length?'Remove style photos':'Forget my style';
+  $('style-read').disabled=state.styleBusy||!state.stylePhotos.length;
+  $('style-btn').textContent=state.stylePhotos.length?'Add more photos':'Add style photos';
+  const sty=activeStyle(), bars=$('style-bars'), note=$('style-note'), empty=$('style-empty'), sugg=$('sugg');
+  if(!sty){
+    bars.hidden=note.hidden=sugg.hidden=true; empty.hidden=false;
+    empty.textContent=state.styleMode==='none'
+      ?'Style matching is off. The stylist goes by the occasion alone.'
+      :'No style yet. Add photos of outfits you like to wear and press Read my style, or choose a style yourself under Style to match.';
+    return;
+  }
+  empty.hidden=true; bars.hidden=note.hidden=sugg.hidden=false; bars.textContent='';
+  for(const k of STYLE_KEYS.slice().sort((a,b)=>sty.profile[b]-sty.profile[a])){
+    const pct=Math.round(sty.profile[k]*100), li=el('li',k===sty.top?null:{class:'low'}), line=el('span',{class:'line'});
+    line.style.width=Math.max(pct,1)+'%';
+    li.append(el('span',null,STYLES[k].label),el('span',null,pct+'%'),line); bars.append(li);
+  }
+  note.textContent=sty.manual
+    ?'Chosen by you. Add photos and press Read my style to have it read from what you wear.'
+    :'Read from '+state.styleRead.n+' photo'+(state.styleRead.n===1?'':'s')+' by '+(state.styleRead.model||STYLE_MODEL.label)+', an AI model running in this browser.'+(state.stylePhotos.length?'':' The photos themselves were not kept.')+' It can misread a photo. If this looks wrong, choose your style yourself under Style to match.';
+  const ul=$('sugg-items'); ul.textContent='';
+  for(const x of suggestions(sty)){
+    const item=x.item, li=el('li'), txt=el('div'), line=el('p',{class:'help'},Math.round(x.match*100)+'% match · ');
+    if(item.noTry) line.append(document.createTextNode('The stylist adds it to outfits with a collared shirt'));
+    else{const b=el('button',{type:'button',class:'link'},'Try it on'); b.addEventListener('click',()=>goTry(item.id)); line.append(b);}
+    txt.append(el('p',null,item.name+', '+item.colour),line);
+    li.append(el('img',{src:pexelsUrl(item.pexels,200),alt:'',style:'object-position:'+focus(item)}),txt,el('span',null,'£'+item.price));
+    ul.append(li);
+  }
+}
+async function addStylePhotos(files){
+  if(state.styleBusy||!files||!files.length) return;
+  let added=0, bad=0, over=0;
+  for(const file of Array.from(files)){
+    if(state.stylePhotos.length>=6){over++; continue;}
+    if(/^(video|audio|text)\//.test(file.type)){bad++; continue;}
+    try{
+      const bmp=await decodePhoto(file), k=Math.min(1,640/Math.max(bmp.width,bmp.height)), W=Math.max(2,Math.round(bmp.width*k)), H=Math.max(2,Math.round(bmp.height*k));
+      const c=document.createElement('canvas'); c.width=W; c.height=H; c.getContext('2d',{willReadFrequently:true}).drawImage(bmp.src||bmp,0,0,W,H);
+      if(bmp.close) bmp.close();
+      const blob=await new Promise(res=>c.toBlob(res,'image/jpeg',0.85));
+      state.stylePhotos.push({canvas:c,url:URL.createObjectURL(blob),probs:null}); added++;
+    }catch(e){bad++;}
+  }
+  renderStyle();
+  const n=state.stylePhotos.length;
+  setStyleStatus((added?n+' photo'+(n===1?'':'s')+' ready. Press Read my style.':'')+(bad?' '+bad+' file'+(bad===1?'':'s')+' could not be opened. Try JPG or PNG.':'')+(over?' Only six photos are used.':''));
+}
+function removeStylePhotos(){
+  if(state.styleBusy) return;
+  for(const ph of state.stylePhotos) URL.revokeObjectURL(ph.url);
+  state.stylePhotos=[]; state.styleRead=null; store.del('fr.styleRead'); $('style-input').value='';
+  renderStyle(); state.planIndex=0; renderPlan(false);
+  setStyleStatus('Style photos and your style reading removed from this browser.');
+}
+const dotVec=(a,b)=>{let t=0; for(let i=0;i<a.length;i++) t+=a[i]*b[i]; return t;};
+function meanUnit(rows){
+  const v=new Array(rows[0].length).fill(0);
+  for(const r of rows) for(let i=0;i<v.length;i++) v[i]+=r[i]/rows.length;
+  const len=Math.sqrt(dotVec(v,v))||1; return v.map(x=>x/len);
+}
+let styleKit=null;
+function styleModel(onProgress){
+  if(styleKit) return styleKit;
+  styleKit=(async()=>{
+    let T; try{T=await import(TF_URL);}catch(e){throw {code:'lib',message:'library'};}
+    const opt={dtype:'q8',progress_callback:onProgress};
+    const tokenizer=await T.AutoTokenizer.from_pretrained(STYLE_MODEL.id);
+    const processor=await T.AutoProcessor.from_pretrained(STYLE_MODEL.id);
+    const textModel=await T.CLIPTextModelWithProjection.from_pretrained(STYLE_MODEL.id,opt);
+    const visionModel=await T.CLIPVisionModelWithProjection.from_pretrained(STYLE_MODEL.id,opt);
+    /* the text side runs once: each style becomes the average of its sentences */
+    const prompts=[], owner=[];
+    STYLE_KEYS.forEach((k,i)=>STYLES[k].prompts.forEach(q=>{prompts.push(q); owner.push(i);}));
+    const {text_embeds}=await textModel(tokenizer(prompts,{padding:'max_length',truncation:true}));
+    const rows=text_embeds.normalize().tolist();
+    const vecs=STYLE_KEYS.map((k,i)=>meanUnit(rows.filter((r,j)=>owner[j]===i)));
+    try{if(textModel.dispose) await textModel.dispose();}catch(e){}
+    return {T,processor,visionModel,vecs};
+  })();
+  styleKit.catch(()=>{styleKit=null;});
+  return styleKit;
+}
+async function readStylePhoto(kit,canvas){
+  const d=canvas.getContext('2d').getImageData(0,0,canvas.width,canvas.height);
+  const image=new kit.T.RawImage(d.data,canvas.width,canvas.height,4).rgb();
+  const {image_embeds}=await kit.visionModel(await kit.processor(image));
+  const v=image_embeds.normalize().tolist()[0];
+  const logits=kit.vecs.map(t=>100*dotVec(v,t)), mx=Math.max(...logits), ex=logits.map(x=>Math.exp(x-mx)), sum=ex.reduce((a,b)=>a+b,0);
+  const probs={}; STYLE_KEYS.forEach((k,i)=>{probs[k]=ex[i]/sum;}); return probs;
+}
+async function actReadStyle(){
+  if(state.styleBusy||!state.stylePhotos.length) return;
+  state.styleBusy=true; renderStyle();
+  const got={}; let shown=false;
+  try{
+    setStyleStatus('Loading the style model. The first time downloads about '+STYLE_MODEL.mb+' MB.');
+    const kit=await styleModel(x=>{
+      if(!x||x.status!=='progress'||!x.total) return;
+      got[x.file]=[x.loaded||0,x.total];
+      let a=0,b=0; for(const f in got){a+=got[f][0]; b+=got[f][1];}
+      if(b>2e6) setStyleStatus('Downloading the style model: '+Math.round(a/1e6)+' of '+Math.round(b/1e6)+' MB. This happens once.');
+    });
+    const n=state.stylePhotos.length;
+    for(let i=0;i<n;i++){
+      setStyleStatus('Reading photo '+(i+1)+' of '+n+'.');
+      await new Promise(r=>setTimeout(r,30));
+      state.stylePhotos[i].probs=await readStylePhoto(kit,state.stylePhotos[i].canvas);
+    }
+    const profile={}; for(const k of STYLE_KEYS) profile[k]=state.stylePhotos.reduce((t,ph)=>t+ph.probs[k],0)/n;
+    state.styleRead={profile,n,model:STYLE_MODEL.label};
+    store.set('fr.styleRead',JSON.stringify(state.styleRead));
+    state.styleMode='auto'; $('in-style').value='auto'; state.planIndex=0;
+    setStyleStatus('Done. Your photos read as '+STYLES[topStyle(profile)].label.toLowerCase()+'. Your suggestions and outfit are updated.'); shown=true;
+  }catch(e){
+    console.warn('style reading',e);
+    setStyleStatus(e&&e.code==='lib'
+      ?'The style model could not be loaded. Check your internet connection, or choose your style yourself under Style to match.'
+      :'The style model did not run in this browser'+(errText(e)?' ('+errText(e).slice(0,120)+')':'')+'. Choose your style yourself under Style to match.');
+  }finally{state.styleBusy=false; renderStyle(); renderPlan(false);}
+  /* on a phone the result sits below the form, so bring it into view */
+  if(shown){const box=$('style-bars').parentNode, r=box.getBoundingClientRect(); if(r.top<0||r.top>window.innerHeight*0.7) box.scrollIntoView({block:'start'});}
+}
+
 /* ---------------------------------------------------------------- stylist agent (rules stand in for the agent's reasoning) */
 function resolvePiece(item){
+  if(item.oneSize) return item.stock.ONE>0?{item,size:'One size',note:''}:null;
   const want=recSize(item);
   if(item.stock[want]>0) return {item,size:want,note:''};
   const up=TOP_SIZES[idx(want)+1];
@@ -926,12 +1170,20 @@ function resolvePiece(item){
   return null;
 }
 function makePlan(){
-  const occ=state.occasion, budget=state.budget, steps=[];
-  steps.push('Read your brief: '+OCCASIONS[occ].toLowerCase()+', £'+budget+' budget, usual size '+state.top+', '+state.height+' cm.');
-  const B=ITEMS.filter(i=>i.role==='base'), M=ITEMS.filter(i=>i.role==='mid'), O=ITEMS.filter(i=>i.role==='outer'), combos=[];
-  for(const b of B){ for(const m of M) combos.push([b,m]); for(const o of O) combos.push([b,o]); for(const m of M) for(const o of O) combos.push([b,m,o]); }
+  const occ=state.occasion, budget=state.budget, steps=[], sty=activeStyle();
+  steps.push('Read your brief: '+OCCASIONS[occ].toLowerCase()+', £'+budget+' budget, usual size '+state.top+', '+state.height+' cm.'+(sty?' Style to match: '+STYLES[sty.top].label.toLowerCase()+', '+sty.how+'.':''));
+  /* what a piece is worth to this shopper: mostly their style when there is one, then the occasion */
+  const worth=i=>sty?0.7*styleScore(i,sty.profile)+0.3*i.occ[occ]:i.occ[occ];
+  if(sty) steps.push('Ranked the collection against your style. Closest pieces: '+listAnd(suggestions(sty).map(x=>x.item.name))+'.');
+  const role=r=>ITEMS.filter(i=>i.role===r), B=role('base'), M=role('mid'), O=role('outer'), L=role('bottom'), A=role('acc'), tops=[], combos=[];
+  for(const b of B){ tops.push([b]); for(const m of M) tops.push([b,m]); for(const o of O) tops.push([b,o]); for(const m of M) for(const o of O) tops.push([b,m,o]); }
+  for(const t of tops) for(const low of [[]].concat(L.map(x=>[x]))){
+    const c=t.concat(low); if(c.length<2) continue;
+    combos.push(c);
+    if(t[0].collar) for(const a of A) combos.push(c.concat([a]));      /* a tie needs a collared shirt */
+  }
   steps.push('Searched the collection: '+ITEMS.length+' pieces make '+combos.length+' possible outfits.');
-  const runs=ITEMS.filter(i=>i.runs!==0).map(i=>i.name+' runs '+(i.runs>0?'small':'large')+', so size '+recSize(i));
+  const runs=ITEMS.filter(i=>i.runs).map(i=>i.name+' runs '+(i.runs>0?'small':'large')+', so size '+recSize(i));
   steps.push('Checked fit data for your size. '+(runs.length?runs.join('. ')+'.':'Every piece is true to size.'));
   const res={}, notes=[];
   for(const i of ITEMS){
@@ -941,23 +1193,26 @@ function makePlan(){
   }
   steps.push('Checked stock in your sizes. '+(notes.length?notes.join(' '):'Everything is in stock.'));
   const options=combos.filter(c=>c.every(i=>res[i.id])).map(c=>{
-    const pieces=c.map(i=>res[i.id]), total=c.reduce((s,i)=>s+i.price,0);
-    let score=c.reduce((s,i)=>s+i.occ[occ],0)-pieces.filter(p=>p.note).length*0.5;
-    if(c.length===3) score+=occ==='cold'?2:-1;
-    return {pieces,total,score};
+    const pieces=c.map(i=>res[i.id]), total=c.reduce((t,i)=>t+i.price,0), layers=c.filter(i=>i.role==='base'||i.role==='mid'||i.role==='outer').length;
+    /* a piece adds to the outfit only if it is worth more than 1.5 out of 3 */
+    let score=c.reduce((t,i)=>t+worth(i)-1.5,0)-pieces.filter(q=>q.note).length*0.5;
+    if(layers===3) score+=occ==='cold'?1:-1;
+    return {pieces,total,score:Math.round(score*100)/100};
   });
-  const inBudget=options.filter(o=>o.total<=budget).sort((x,y)=>y.score-x.score||x.total-y.total);
+  const rank=(x,y)=>y.score-x.score||x.total-y.total, names=o=>o.pieces.map(q=>q.item.name).join(' + ');
+  const inBudget=options.filter(o=>o.total<=budget).sort(rank);
   steps.push('Applied your budget: '+inBudget.length+' of '+options.length+' outfits cost £'+budget+' or less.');
   if(!inBudget.length){
     const cheapest=options.length?Math.min(...options.map(o=>o.total)):0;
     steps.push('Stopped. Nothing fits the budget'+(cheapest?': the cheapest outfit is £'+cheapest+'. Raise the budget and plan again.':'.'));
-    return {steps,pick:null,count:0};
+    return {steps,pick:null,count:0,style:sty};
   }
-  const n=state.planIndex%inBudget.length, pick=inBudget[n];
-  steps.push('Chose '+(n===0?'the best match':'option '+(n+1)+' of '+inBudget.length)+' for '+OCCASIONS[occ].toLowerCase()+': '+pick.pieces.map(p=>p.item.name).join(' + ')+', £'+pick.total+'.');
+  const n=state.planIndex%inBudget.length, pick=inBudget[n], best=options.slice().sort(rank)[0];
+  steps.push('Chose '+(n===0?'the best match':'option '+(n+1)+' of '+inBudget.length)+' for '+(sty?'your '+STYLES[sty.top].label.toLowerCase()+' style and ':'')+OCCASIONS[occ].toLowerCase()+': '+names(pick)+', £'+pick.total+'.'
+    +(n===0&&best.total>budget?' The closest match overall, '+names(best)+', costs £'+best.total+', which is over your budget.':''));
   steps.push('Held a delivery slot: free collection from your local store, tomorrow after 12:00.');
   steps.push('Stopped for your approval. Nothing is ordered or charged until you approve.');
-  return {steps,pick,count:inBudget.length};
+  return {steps,pick,count:inBudget.length,style:sty};
 }
 let planRun=0;
 function renderPlan(animate){
@@ -968,11 +1223,11 @@ function renderPlan(animate){
     if(run!==planRun) return;
     if(!plan.pick){prop.hidden=true; return;}
     prop.hidden=false;
-    $('prop-title').textContent='Proposed outfit · '+OCCASIONS[state.occasion];
+    $('prop-title').textContent='Proposed outfit · '+(plan.style?STYLES[plan.style.top].label+' · ':'')+OCCASIONS[state.occasion];
     const ul=$('prop-items'); ul.textContent='';
     for(const p of plan.pick.pieces){
       const li=el('li'), txt=el('div');
-      txt.append(el('p',null,p.item.name+', '+p.item.colour),el('p',{class:'help'},'Size '+p.size+' · '+verdictOf(p.item,p.size).label+(p.note?' · '+p.note:' · In stock')));
+      txt.append(el('p',null,p.item.name+', '+p.item.colour),el('p',{class:'help'},p.item.oneSize?'One size · In stock':'Size '+p.size+' · '+verdictOf(p.item,p.size).label+(p.note?' · '+p.note:' · In stock')));
       li.append(el('img',{src:pexelsUrl(p.item.pexels,200),alt:'',style:'object-position:'+focus(p.item)}),txt,el('span',null,'£'+p.item.price));
       ul.append(li);
     }
@@ -990,7 +1245,7 @@ function approve(){
   const plan=state.plan; if(!plan||!plan.pick) return;
   state.approved=true;
   $('prop-actions').hidden=true; $('prop-done').hidden=false; $('prop-status').textContent='';
-  $('done-text').textContent='You approved '+plan.pick.pieces.map(p=>p.item.name+' ('+p.size+')').join(' and ')+' for £'+plan.pick.total+'. This is a demo, so nothing was bought or charged. In the live service the agent would now place the order and book the collection.';
+  $('done-text').textContent='You approved '+listAnd(plan.pick.pieces.map(p=>p.item.name+' ('+p.size+')'))+' for £'+plan.pick.total+'. This is a demo, so nothing was bought or charged. In the live service the agent would now place the order and book the collection.';
   const sel=$('ret-piece'); sel.textContent='';
   for(const p of plan.pick.pieces) sel.append(el('option',{value:p.item.id},p.item.name));
   $('ret-out').textContent='';
@@ -999,9 +1254,9 @@ function approve(){
 function bookReturn(){
   const item=BY_ID[$('ret-piece').value], reason=$('ret-reason').value; if(!item) return;
   const p=state.plan.pick.pieces.find(x=>x.item.id===item.id), i=idx(p.size);
-  const swap=reason==='Too small'?TOP_SIZES[i+1]:reason==='Too big'?TOP_SIZES[i-1]:null;
+  const swap=item.oneSize?null:reason==='Too small'?TOP_SIZES[i+1]:reason==='Too big'?TOP_SIZES[i-1]:null;
   const offer=swap?(item.stock[swap]>0?' Size '+swap+' is in stock, so the agent offers a swap.':' Size '+swap+' is out of stock, so the agent offers a refund.'):' The agent offers a refund.';
-  $('ret-out').textContent='Return booked for the '+item.name+': free drop-off at your local store.'+offer+' The reason "'+reason.toLowerCase()+'" is logged against size '+p.size+' and feeds the fit advice for this piece. Customer service takes it from here. Demo only.';
+  $('ret-out').textContent='Return booked for the '+item.name+': free drop-off at your local store.'+offer+' The reason "'+reason.toLowerCase()+'" is logged against '+(item.oneSize?'this piece':'size '+p.size)+' and feeds the fit advice for this piece. Customer service takes it from here. Demo only.';
   $('trace').append(el('li',null,'Booked a return for the '+item.name+' ('+reason.toLowerCase()+') and handed it to customer service.'));
 }
 
@@ -1030,7 +1285,15 @@ function init(){
   for(const k in OCCASIONS) $('in-occasion').append(el('option',{value:k},OCCASIONS[k]));
   $('in-occasion').value=state.occasion;
   try{$('chk-consent').checked=sessionStorage.getItem('fr.consent')==='1';}catch(e){}
-  renderGrid(); syncAll(); syncToken(); renderPlan(false);
+  $('in-style').append(el('option',{value:'auto'},'From my photos'));
+  for(const k of STYLE_KEYS) $('in-style').append(el('option',{value:k},STYLES[k].label));
+  $('in-style').append(el('option',{value:'none'},'No style, occasion only'));
+  $('in-style').value=state.styleMode;
+  try{
+    const r=JSON.parse(store.get('fr.styleRead')||'null');
+    if(r&&r.profile&&STYLE_KEYS.every(k=>typeof r.profile[k]==='number')&&r.n>0) state.styleRead={profile:r.profile,n:r.n,model:r.model};
+  }catch(e){}
+  renderGrid(); syncAll(); syncToken(); renderStyle(); renderPlan(false);
   lib().catch(()=>offline('ai'));
 
   $('photo-btn').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault(); $('photo-input').click();}});
@@ -1069,6 +1332,11 @@ function init(){
   $('share').addEventListener('click',actShare);
   $('save').addEventListener('click',actSave);
 
+  $('style-btn').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault(); $('style-input').click();}});
+  $('style-input').addEventListener('change',e=>{const f=Array.from(e.target.files||[]); e.target.value=''; addStylePhotos(f);});
+  $('style-remove').addEventListener('click',removeStylePhotos);
+  $('style-read').addEventListener('click',actReadStyle);
+  $('in-style').addEventListener('change',e=>{state.styleMode=e.target.value; state.planIndex=0; renderStyle(); renderPlan(false);});
   $('in-occasion').addEventListener('change',e=>{state.occasion=e.target.value; state.planIndex=0; renderPlan(false);});
   $('in-budget').addEventListener('change',e=>{const v=clamp(Math.round(+e.target.value)||80,20,300); e.target.value=String(v); state.budget=v; state.planIndex=0; renderPlan(false);});
   $('plan').addEventListener('click',()=>{state.planIndex=0; renderPlan(true);});
