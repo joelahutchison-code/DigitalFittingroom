@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>The Fitting Room · AI try-on concept</title>
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400&family=Inter:wght@300;400&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* Layout: wordmark alone top-left; five product tiles in one row; then a 320px form column beside the mirror, which takes the rest of the width. */
+  --canvas:#ffffff;
+  --ink:#000000;
+  --stone:#757575;
+  --font-ui:'Helvetica Now Text','Helvetica Neue',Inter,Arial,sans-serif;
+  --font-mark:'Bodoni Moda','Didot','Bodoni MT',serif;
+  --t-cap:11px; --t-sm:12px; --t-body:13px; --t-lg:15px; --t-head:16px;
+  --gap:20px; --section:48px; --edge:clamp(20px,7.8vw,112px);
+  color-scheme:light;
+}
+*{box-sizing:border-box;border-radius:0}
+html{background:var(--canvas)}
+body{margin:0;background:var(--canvas);color:var(--ink);font-family:var(--font-ui);font-size:var(--t-body);line-height:1.5;font-weight:400;-webkit-font-smoothing:antialiased}
+h1,h2,h3,p,ul,dl,dd,dt,figure{margin:0;padding:0}
+ul{list-style:none}
+h1,h2,h3{font-size:var(--t-body);font-weight:400;text-transform:uppercase}
+a{color:var(--ink)}
+.page{max-width:calc(1200px + 2*var(--edge));margin:0 auto;padding:var(--section) var(--edge)}
+.stone{color:var(--stone)}
+.file-input{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden}
+.visually-hidden{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+:focus-visible{outline:1px solid var(--ink);outline-offset:3px}
+[hidden]{display:none !important}
+
+.top{display:flex;justify-content:space-between;align-items:flex-end;gap:var(--gap);flex-wrap:wrap}
+.mark{font-family:var(--font-mark);font-size:40px;line-height:1;letter-spacing:-0.02em;text-transform:uppercase;font-weight:400}
+.cap{font-size:var(--t-cap);text-transform:uppercase;color:var(--stone);margin-top:12px}
+nav{display:flex;gap:var(--gap);flex-wrap:wrap}
+nav a{text-decoration:none;text-transform:uppercase}
+nav a:hover{text-decoration:underline}
+.notice{margin-top:32px;border-top:1px solid var(--ink);border-bottom:1px solid var(--ink);padding:12px 0;font-size:var(--t-cap);text-transform:uppercase;color:var(--stone)}
+
+section{margin-top:var(--section)}
+.sec-head{display:flex;justify-content:space-between;align-items:baseline;gap:4px var(--gap);margin-bottom:var(--gap);flex-wrap:wrap}
+
+.grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:var(--gap)}
+.card{display:flex;flex-direction:column}
+.card .ph{display:block;width:100%;aspect-ratio:3/4;object-fit:cover;background:#f1f0ee}
+.offline{border:1px solid var(--ink);padding:12px 16px;margin-top:20px}
+.card .name{margin-top:12px}
+.card .meta{color:var(--stone);margin-bottom:12px}
+.card .btn{margin-top:auto;width:100%}
+
+.btn{display:inline-block;font:inherit;font-size:var(--t-body);text-transform:uppercase;color:var(--ink);background:transparent;border:1px solid var(--ink);padding:12px 20px;cursor:pointer;text-align:center;text-decoration:none}
+.btn:hover{text-decoration:underline}
+.btn:disabled{color:var(--stone);border-color:var(--stone);cursor:default;text-decoration:none}
+.link{font:inherit;background:none;border:0;padding:0;color:var(--ink);text-decoration:underline;cursor:pointer;text-align:left;text-transform:none}
+
+.split{display:grid;grid-template-columns:320px minmax(0,1fr);gap:var(--section);align-items:start}
+.form{display:grid;gap:32px}
+.step{display:grid;gap:12px}
+.step h3 .n{color:var(--stone);margin-right:12px;font-variant-numeric:tabular-nums}
+.help{font-size:var(--t-cap);color:var(--stone)}
+.row{display:flex;gap:16px;flex-wrap:wrap;align-items:baseline}
+.field{display:grid;gap:4px}
+.field span{font-size:var(--t-cap);text-transform:uppercase;color:var(--stone)}
+.field input[type=number],.field input[type=password],.field select{font:inherit;font-size:var(--t-body);color:var(--ink);background-color:transparent;border:0;border-bottom:1px solid var(--ink);padding:8px 0;width:100%;appearance:none;-webkit-appearance:none;-moz-appearance:textfield}
+.field select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M0.5 0.5L5 5L9.5 0.5' fill='none' stroke='%23000'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 2px center;padding-right:20px;cursor:pointer}
+.pieces li{border-bottom:1px solid var(--ink)}
+.pieces li:first-child{border-top:1px solid var(--ink)}
+.pieces label{display:grid;grid-template-columns:13px minmax(0,1fr) auto;gap:12px;padding:8px 0;align-items:center;cursor:pointer}
+.pieces input{appearance:none;-webkit-appearance:none;width:13px;height:13px;border:1px solid var(--ink);margin:0;background:transparent;cursor:pointer}
+.pieces input:checked{background:var(--ink)}
+.status{font-size:var(--t-sm);min-height:18px}
+.actions{display:grid;gap:12px}
+details summary{cursor:pointer;text-transform:uppercase;list-style:none}
+details summary::-webkit-details-marker{display:none}
+details summary::after{content:' +';color:var(--stone)}
+details[open] summary::after{content:' −'}
+details .inner{display:grid;gap:12px;padding-top:12px}
+
+.mirror-wrap{display:flex;gap:32px;align-items:flex-start;flex-wrap:wrap}
+.mirror{flex:0 1 520px;min-width:0;max-width:100%}
+.frame{position:relative;background:#f1f0ee;min-height:200px}
+.frame img{display:block;width:100%;height:auto;max-height:780px;object-fit:contain}
+.frame.drop{outline:1px solid var(--ink);outline-offset:4px}
+.veil{position:absolute;inset:0;background:rgba(255,255,255,.82);display:flex;align-items:flex-end;padding:20px}
+.veil p{text-transform:uppercase;font-variant-numeric:tabular-nums}
+.bar{position:absolute;left:0;top:0;height:1px;background:var(--ink);width:0}
+.mirror figcaption{font-size:var(--t-cap);text-transform:uppercase;color:var(--stone);margin-top:12px}
+.looks{display:flex;gap:12px;flex-wrap:wrap;margin-top:20px}
+.looks button{font:inherit;font-size:var(--t-cap);text-transform:uppercase;background:none;border:0;border-bottom:1px solid transparent;padding:0 0 4px;cursor:pointer;color:var(--stone);display:grid;gap:4px;justify-items:start;width:72px;text-align:left}
+.looks button img{display:block;width:72px;height:96px;object-fit:cover;object-position:top}
+.looks button[aria-pressed="true"]{color:var(--ink);border-bottom-color:var(--ink)}
+.fit{flex:1 1 240px;min-width:220px;max-width:360px;display:grid;gap:32px}
+.block{display:grid;gap:12px}
+.fit-item{display:grid;gap:8px}
+.sizes{display:flex;gap:4px 16px;flex-wrap:wrap}
+.sizes button{font:inherit;background:none;border:0;padding:4px 0;color:var(--stone);cursor:pointer;text-transform:uppercase}
+.sizes button[aria-pressed="true"]{color:var(--ink);text-decoration:underline;text-underline-offset:4px}
+.verdict{text-transform:uppercase}
+.check{display:flex;gap:12px;align-items:center;cursor:pointer;text-transform:uppercase}
+.check input{appearance:none;-webkit-appearance:none;width:13px;height:13px;border:1px solid var(--ink);margin:0;background:transparent;flex:none;cursor:pointer}
+.check input:checked{background:var(--ink)}
+
+.about{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--gap) var(--section)}
+.about div{display:grid;gap:12px;align-content:start}
+.about p,.about li{max-width:62ch}
+.credits{margin-top:32px;display:grid;gap:12px}
+.credits ul{display:grid;gap:4px}
+footer{margin-top:var(--section);border-top:1px solid var(--ink);padding-top:12px;font-size:var(--t-cap);color:var(--stone);text-transform:uppercase}
+
+@media (max-width:1000px){
+  .grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .split{grid-template-columns:minmax(0,1fr)}
+  .about{grid-template-columns:minmax(0,1fr)}
+}
+@media (max-width:560px){
+  .grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .mark{font-size:30px}
+}
+@media (prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}.bar{transition:width 1s linear}}
+</style>
+</head>
+<body>
+<noscript><p style="padding:20px;font:13px Arial">This page needs JavaScript and an internet connection. Open it in Chrome, Edge, Safari or Firefox, not in a file preview.</p></noscript>
+<div class="page">
+
+<header class="top">
+  <div>
+    <h1 class="mark">The Fitting Room</h1>
+    <p class="cap">An AI virtual fitting room concept for Next</p>
+  </div>
+  <nav aria-label="Sections">
+    <a href="#collection">Collection</a>
+    <a href="#fitting-room">Fitting room</a>
+    <a href="#about">About this prototype</a>
+  </nav>
+</header>
+<p class="notice">Student concept prototype. Not an official Next website. The pieces are stock photographs, and the names, prices and size chart are illustrative.</p>
+
+<section id="collection" aria-labelledby="h-col">
+  <div class="sec-head">
+    <h2 id="h-col">New in</h2>
+    <p class="stone">5 PIECES</p>
+  </div>
+  <ul class="grid" id="grid"></ul>
+</section>
+
+<section id="fitting-room" aria-labelledby="h-fit">
+  <div class="sec-head">
+    <h2 id="h-fit">Fitting room</h2>
+    <p class="stone">SEE YOURSELF WEARING EACH PIECE</p>
+  </div>
+  <div class="split">
+    <div class="form">
+      <div class="step">
+        <h3><span class="n">01</span>Your photo</h3>
+        <div class="row">
+          <label class="btn" for="photo-input" id="photo-btn" tabindex="0" role="button">Upload photo</label>
+          <input type="file" id="photo-input" class="file-input" accept="image/*">
+          <button type="button" class="link" id="photo-remove" hidden>Remove photo</button>
+        </div>
+        <p class="help" id="photo-name">You can also drop a photo onto the mirror.</p>
+        <p class="help">Works best facing the camera, waist-up or full length, in good light, with your arms clear of your body.</p>
+        <p class="help">When you press Try it on, your photo is sent to the AI model's public demo server on Hugging Face, which makes the image. Use only photos of yourself, or of someone who has agreed.</p>
+      </div>
+
+      <div class="step">
+        <h3><span class="n">02</span>Your size</h3>
+        <label class="field" for="in-height"><span>Height (cm)</span>
+          <input type="number" id="in-height" min="140" max="215" step="1" value="178" inputmode="numeric">
+        </label>
+        <label class="field" for="in-top"><span>Usual top size</span>
+          <select id="in-top"></select>
+        </label>
+      </div>
+
+      <div class="step">
+        <h3><span class="n">03</span>Your piece</h3>
+        <ul class="pieces" id="pieces"></ul>
+      </div>
+
+      <div class="actions">
+        <button type="button" class="btn" id="try">Try it on</button>
+        <p class="status" id="status" role="status" aria-live="polite"></p>
+        <button type="button" class="link" id="again" hidden>Generate a fresh image</button>
+      </div>
+
+      <details id="settings">
+        <summary>AI settings</summary>
+        <div class="inner">
+          <label class="field" for="in-model"><span>AI model</span>
+            <select id="in-model"></select>
+          </label>
+          <label class="field" for="in-token"><span>Hugging Face token (optional)</span>
+            <input type="password" id="in-token" autocomplete="off" spellcheck="false" placeholder="hf_…">
+          </label>
+          <div class="row">
+            <button type="button" class="link" id="token-save">Save token in this browser</button>
+            <button type="button" class="link" id="token-clear" hidden>Forget token</button>
+          </div>
+          <p class="help" id="token-note">Without a token you share a small anonymous allowance that runs out after a few images. A free Hugging Face account has its own daily allowance: create a read token at huggingface.co/settings/tokens and paste it here. It stays in this browser and is sent only to Hugging Face.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="mirror-wrap" id="mirror-wrap">
+      <figure class="mirror">
+        <div class="frame" id="frame">
+          <img id="mirror-img" alt="">
+          <div class="veil" id="veil" hidden><span class="bar" id="bar"></span><p id="veil-text"></p></div>
+        </div>
+        <figcaption id="mirror-cap"></figcaption>
+        <ul class="looks" id="looks" aria-label="Pieces you have tried on"></ul>
+      </figure>
+      <div class="fit">
+        <div class="block">
+          <h3>Fit</h3>
+          <div class="fit-item" id="fit-item"></div>
+        </div>
+        <div class="block" id="tools">
+          <label class="check" id="lab-orig" hidden><input type="checkbox" id="chk-orig"><span>Show original photo</span></label>
+          <a class="btn" id="save" hidden download="fitting-room.jpg">Save image</a>
+          <p class="help" id="made-by" hidden></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="about" aria-labelledby="h-about">
+  <div class="sec-head"><h2 id="h-about">About this prototype</h2></div>
+  <div class="about">
+    <div>
+      <h3>What runs live</h3>
+      <p>A virtual try-on AI model takes your photo and the photo of the piece and generates a new image of you wearing it, keeping your face, pose and background. Each image takes about half a minute. Images you have made are kept in this browser, so they reopen at once.</p>
+    </div>
+    <div>
+      <h3>What it cannot do yet</h3>
+      <p>The image shows cut, colour and drape on your body, but it does not change with the size you pick: the fit notes carry the size logic. Details the product photo does not show are guessed. The free model has a daily limit and can be busy. A retailer would run its own model on its own product, size and returns data.</p>
+    </div>
+    <div>
+      <h3>Your photo</h3>
+      <p>The photo goes from this browser to the model's public demo server on Hugging Face and nowhere else. This page has no server of its own. Generated images are stored only in this browser, and Remove photo clears them.</p>
+    </div>
+  </div>
+  <div class="credits">
+    <h3>Credits</h3>
+    <ul id="credits"></ul>
+    <p class="help">Product photographs are free to use under the Pexels licence. Try-on images are generated by open models published on Hugging Face.</p>
+  </div>
+</section>
+
+<footer>Student concept prototype for a university digital strategy project. Not affiliated with or endorsed by Next plc.</footer>
+</div>
+
+<script>
+(() => {
+'use strict';
+
+/* ---------------------------------------------------------------- data */
+const GRADIO_URL = 'https://cdn.jsdelivr.net/npm/@gradio/client@2.8.0/dist/index.min.js';
+const TOP_SIZES = ['XS','S','M','L','XL','XXL'];
+/* crop = [left, top, right, bottom] as fractions of the stock photograph: the part shown on the tile and sent to the model */
+const ITEMS = [
+  {id:'tee',     name:'Cotton Crew T-Shirt',   colour:'White',      price:12, ease:10, pexels:12039633, by:'mockupbee',          page:'https://www.pexels.com/photo/white-t-shirt-on-white-surface-12039633/',                   crop:[0.2,0.04,0.87,0.96],  desc:'white short-sleeved crew-neck T-shirt'},
+  {id:'shirt',   name:'Linen Grandad Shirt',   colour:'Ecru',       price:34, ease:14, pexels:22441297, by:'dayong tien',        page:'https://www.pexels.com/photo/shirt-on-hanger-on-branch-22441297/',                        crop:[0,0.16,1,1],          desc:'ecru linen shirt with a grandad collar'},
+  {id:'hoodie',  name:'Brushed Cotton Hoodie', colour:'Dusty pink', price:32, ease:16, pexels:6786666,  by:'Artem Podrez',       page:'https://www.pexels.com/photo/a-person-holding-a-brown-hoodie-6786666/',                   crop:[0.02,0.3,1,0.97],     desc:'dusty pink pullover hoodie'},
+  {id:'cardigan',name:'Chunky Knit Cardigan',  colour:'Red',        price:45, ease:14, pexels:36129313, by:'Polina Chistyakova', page:'https://www.pexels.com/photo/bright-red-knit-cardigan-on-hanger-display-36129313/',       crop:[0.03,0.04,0.97,0.98], desc:'red chunky knit cardigan with buttons'},
+  {id:'jacket',  name:'Denim Chore Jacket',    colour:'Indigo',     price:55, ease:18, pexels:16428734, by:'James Frid',         page:'https://www.pexels.com/photo/denim-jacket-in-midair-16428734/',                           crop:[0.2,0.1,0.85,0.72],   desc:'indigo denim jacket'}
+];
+const BY_ID = Object.fromEntries(ITEMS.map(i => [i.id, i]));
+
+/* Free try-on models hosted as Hugging Face Spaces. Each run() takes the person and garment images and returns the generated file. */
+const MODELS = [
+  {id:'fashn', label:'FASHN VTON 1.5', space:'fashn-ai/fashn-vton-1.5',
+    run:async(app,file,person,garment)=>{
+      const r=await app.predict('/try_on',{person_image:file(person),garment_image:file(garment),category:'tops',garment_photo_type:'flat-lay',num_timesteps:50,guidance_scale:1.5,seed:42,segmentation_free:true});
+      return r.data[0];
+    }},
+  {id:'leffa', label:'Leffa', space:'franciszzj/Leffa',
+    run:async(app,file,person,garment)=>{
+      const r=await app.predict('/leffa_predict_vt',{src_image_path:file(person),ref_image_path:file(garment),ref_acceleration:'False',step:30,scale:2.5,seed:42,vt_model_type:'viton_hd',vt_garment_type:'upper_body',vt_repaint:'False'});
+      return r.data[0];
+    }},
+  {id:'idm', label:'IDM-VTON', space:'yisol/IDM-VTON',
+    run:async(app,file,person,garment,item)=>{
+      const r=await app.predict('/tryon',{dict:{background:file(person),layers:[],composite:null},garm_img:file(garment),garment_des:item.desc,is_checked:true,is_checked_crop:true,denoise_steps:30,seed:42});
+      return r.data[0];
+    }}
+];
+
+const state = {
+  photo:null,           // {blob,url,hash,name}
+  item:'hoodie',
+  height:178, top:'M', override:{},
+  results:{},           // item id -> {url, blob, model, seconds}
+  showOriginal:false, busy:false, model:'auto'
+};
+
+/* ---------------------------------------------------------------- helpers */
+const $ = id => document.getElementById(id);
+function el(tag,attrs,text){const n=document.createElement(tag);if(attrs)for(const k in attrs){if(k==='class')n.className=attrs[k];else n.setAttribute(k,attrs[k]);}if(text!==undefined)n.textContent=text;return n;}
+function setStatus(t){$('status').textContent=t||'';}
+function errText(e){if(!e)return'';if(typeof e==='string')return e;return String(e.message||e.title||e.detail||e.error||e);}
+const store={
+  get(k){try{return localStorage.getItem(k);}catch(e){return null;}},
+  set(k,v){try{localStorage.setItem(k,v);}catch(e){}},
+  del(k){try{localStorage.removeItem(k);}catch(e){}}
+};
+/* generated images are kept in this browser so they reopen at once */
+const looksDb={
+  db:null,
+  open(){
+    if(this.db) return Promise.resolve(this.db);
+    return new Promise((res,rej)=>{
+      let r; try{r=indexedDB.open('fitting-room',1);}catch(e){rej(e);return;}
+      r.onupgradeneeded=()=>r.result.createObjectStore('looks');
+      r.onsuccess=()=>{this.db=r.result;res(this.db);};
+      r.onerror=()=>rej(r.error);
+    });
+  },
+  async tx(mode,fn){
+    try{
+      const db=await this.open();
+      return await new Promise((res,rej)=>{const t=db.transaction('looks',mode), q=fn(t.objectStore('looks')); t.oncomplete=()=>res(q&&q.result); t.onerror=()=>rej(t.error);});
+    }catch(e){return undefined;}
+  },
+  get(k){return this.tx('readonly',s=>s.get(k));},
+  put(k,v){return this.tx('readwrite',s=>s.put(v,k));},
+  del(k){return this.tx('readwrite',s=>s.delete(k));}
+};
+
+/* ---------------------------------------------------------------- product photographs */
+function pexelsUrl(id,w){return 'https://images.pexels.com/photos/'+id+'/pexels-photo-'+id+'.jpeg?auto=compress&cs=tinysrgb&w='+(w||1200);}
+function loadGarment(item){
+  if(item._g) return item._g;
+  item._g=(async()=>{
+    const r=await fetch(pexelsUrl(item.pexels),{mode:'cors'});
+    if(!r.ok) throw new Error('photo '+r.status);
+    const bmp=await createImageBitmap(await r.blob());
+    const [x0,y0,x1,y1]=item.crop;
+    const sx=Math.floor(bmp.width*x0), sy=Math.floor(bmp.height*y0);
+    const sw=Math.max(1,Math.min(bmp.width-sx,Math.round(bmp.width*(x1-x0)))), sh=Math.max(1,Math.min(bmp.height-sy,Math.round(bmp.height*(y1-y0))));
+    const c=document.createElement('canvas'); c.width=sw; c.height=sh;
+    c.getContext('2d').drawImage(bmp,sx,sy,sw,sh,0,0,sw,sh);
+    const blob=await new Promise(res=>c.toBlob(res,'image/jpeg',0.92));
+    return {canvas:c,blob,url:URL.createObjectURL(blob)};
+  })();
+  item._g.catch(()=>{item._g=null;});
+  return item._g;
+}
+function drawTile(canvas,g){
+  const ctx=canvas.getContext('2d'), W=canvas.width, H=canvas.height, src=g.canvas;
+  const px=src.getContext('2d').getImageData(2,2,1,1).data;
+  ctx.fillStyle='rgb('+px[0]+','+px[1]+','+px[2]+')'; ctx.fillRect(0,0,W,H);
+  const k=Math.min(W/src.width,H/src.height), w=src.width*k, h=src.height*k;
+  ctx.drawImage(src,(W-w)/2,(H-h)/2,w,h);
+}
+
+/* ---------------------------------------------------------------- fit notes */
+function sizeOf(item){return state.override[item.id]!==undefined?state.override[item.id]:state.top;}
+function fitCopy(item,size){
+  const d=TOP_SIZES.indexOf(size)-TOP_SIZES.indexOf(state.top), e=item.ease, net=e+5*d, out={verdict:'',lines:[],rec:''};
+  if(net<4){out.verdict='Too tight'; out.lines.push((net<=0?'No room':'Only '+net+' cm of room')+' at the chest. Expect pulling across the chest and shoulders.');}
+  else if(net<e-2.5){out.verdict='Close fit'; out.lines.push(net+' cm of room at the chest, '+(e-net)+' cm less than designed.');}
+  else if(net<=e+2.5){out.verdict='Regular fit'; out.lines.push(net+' cm of room at the chest, as designed.');}
+  else if(net<=e+7.5){out.verdict='Relaxed fit'; out.lines.push(net+' cm of room at the chest, '+(net-e)+' cm more than designed. The shoulder seam drops slightly.');}
+  else{out.verdict='Oversized'; out.lines.push(net+' cm of room at the chest, '+(net-e)+' cm more than designed.');}
+  if(d!==0) out.lines.push('Body '+Math.abs(1.5*d)+' cm '+(d>0?'longer':'shorter')+' and sleeves '+Math.abs(d)+' cm '+(d>0?'longer':'shorter')+' than your usual size.');
+  if(state.height>=188) out.lines.push('At '+state.height+' cm, body and sleeves may sit short. Choose a Tall length where one is offered.');
+  else if(state.height<=167) out.lines.push('At '+state.height+' cm, body and sleeves may run long.');
+  out.rec='Recommended for you: '+state.top;
+  return out;
+}
+
+/* ---------------------------------------------------------------- interface */
+function renderGrid(){
+  const grid=$('grid'); grid.textContent='';
+  for(const item of ITEMS){
+    const li=el('li',{class:'card'});
+    /* a plain image: loads wherever the page has internet, with no script or cross-site permission needed */
+    const cx=Math.round((item.crop[0]+item.crop[2])*50), cy=Math.round((item.crop[1]+item.crop[3])*50);
+    const cv=el('img',{class:'ph',src:pexelsUrl(item.pexels,800),alt:item.colour+' '+item.name.toLowerCase(),style:'object-position:'+cx+'% '+cy+'%'});
+    cv.addEventListener('error',()=>offline('photos'),{once:true});
+    const b=el('button',{type:'button',class:'btn'},'Try it on');
+    b.addEventListener('click',()=>{selectItem(item.id); $('fitting-room').scrollIntoView({block:'start'}); if(state.photo) tryOn(false);});
+    li.append(cv,el('p',{class:'name'},item.name),el('p',{class:'meta'},item.colour+' · £'+item.price),b);
+    grid.append(li);
+  }
+  const cr=$('credits');
+  for(const item of ITEMS){
+    const li=el('li'); li.append(document.createTextNode(item.name+': photograph by '+item.by+' on '));
+    li.append(el('a',{href:item.page,rel:'noopener'},'Pexels')); cr.append(li);
+  }
+  for(const m of MODELS){
+    const li=el('li'); li.append(document.createTextNode('AI model: '+m.label+', '));
+    li.append(el('a',{href:'https://huggingface.co/spaces/'+m.space,rel:'noopener'},'huggingface.co/spaces/'+m.space)); cr.append(li);
+  }
+}
+function renderPieces(){
+  const ul=$('pieces'); ul.textContent='';
+  for(const item of ITEMS){
+    const li=el('li'), lab=el('label');
+    const inp=el('input',{type:'radio',name:'piece',value:item.id,id:'piece-'+item.id});
+    inp.checked=state.item===item.id;
+    inp.addEventListener('change',()=>selectItem(item.id));
+    lab.append(inp,el('span',null,item.name),el('span',{class:'stone'},state.results[item.id]?'Tried on':''));
+    li.append(lab); ul.append(li);
+  }
+}
+function renderFit(){
+  const box=$('fit-item'); box.textContent='';
+  const item=BY_ID[state.item], size=sizeOf(item), copy=fitCopy(item,size);
+  box.append(el('p',null,item.name+', '+item.colour));
+  const sz=el('div',{class:'sizes',role:'group','aria-label':'Size for '+item.name});
+  for(const s of TOP_SIZES){
+    const b=el('button',{type:'button','aria-pressed':String(s===size)},s);
+    b.addEventListener('click',()=>{state.override[item.id]=s; renderFit();});
+    sz.append(b);
+  }
+  box.append(sz,el('p',{class:'verdict'},copy.verdict));
+  for(const l of copy.lines) box.append(el('p',{class:'help'},l));
+  box.append(el('p',{class:'help'},copy.rec));
+  box.append(el('p',{class:'help'},'The image shows the cut and colour on you. It does not change with size, so read the size from these notes.'));
+}
+function renderLooks(){
+  const ul=$('looks'); ul.textContent='';
+  for(const item of ITEMS){
+    const r=state.results[item.id]; if(!r) continue;
+    const li=el('li'), b=el('button',{type:'button','aria-pressed':String(state.item===item.id)});
+    b.append(el('img',{src:r.url,alt:''}),el('span',null,item.name.split(' ').slice(-1)[0]));
+    b.addEventListener('click',()=>selectItem(item.id));
+    li.append(b); ul.append(li);
+  }
+}
+function syncMirror(){
+  const item=BY_ID[state.item], r=state.results[item.id], img=$('mirror-img');
+  let cap='';
+  if(state.photo&&r&&!state.showOriginal){img.src=r.url; img.alt='You wearing the '+item.name; cap='You in the '+item.name+'. Generated by AI.';}
+  else if(state.photo){img.src=state.photo.url; img.alt='Your photo'; cap=r?'Your original photo':'Your photo. Press Try it on.';}
+  else{
+    cap=item.name+'. Upload your photo to see it on you.'; img.alt=item.colour+' '+item.name;
+    img.src=pexelsUrl(item.pexels,1200);
+  }
+  $('mirror-cap').textContent=cap;
+  $('lab-orig').hidden=!(state.photo&&r);
+  const save=$('save'), made=$('made-by');
+  if(state.photo&&r){
+    save.hidden=false; save.href=r.url; save.download='fitting-room-'+item.id+'.jpg';
+    if(!r.blob){save.removeAttribute('download'); save.target='_blank'; save.rel='noopener';} else {save.removeAttribute('target');}
+    made.hidden=false; made.textContent='Made by '+r.model+(r.seconds?' in '+r.seconds+' seconds':'')+'.';
+  }else{save.hidden=true; made.hidden=true;}
+  $('again').hidden=!(state.photo&&r)||state.busy;
+  $('photo-remove').hidden=!state.photo;
+  $('try').disabled=state.busy;
+}
+function selectItem(id){
+  state.item=id; state.showOriginal=false; $('chk-orig').checked=false;
+  renderPieces(); renderFit(); renderLooks(); syncMirror();
+  if(!state.busy) setStatus(state.photo?(state.results[id]?'':'Press Try it on to see this piece on you.'):'');
+}
+
+/* ---------------------------------------------------------------- photo */
+async function hashOf(file){
+  try{if(!(window.crypto&&crypto.subtle)) throw 0; const d=await crypto.subtle.digest('SHA-256',await file.arrayBuffer()); return [...new Uint8Array(d)].slice(0,12).map(x=>x.toString(16).padStart(2,'0')).join('');}
+  catch(e){return 'f'+file.size+'-'+(file.lastModified||0);}
+}
+async function decodePhoto(file){
+  /* try the fast decoder, then the browser's own image decoder (which also reads HEIC on iPhone) */
+  try{return await createImageBitmap(file,{imageOrientation:'from-image'});}catch(e){}
+  try{return await createImageBitmap(file);}catch(e){}
+  const u=URL.createObjectURL(file);
+  try{
+    const im=new Image(); im.decoding='async'; im.src=u;
+    await (im.decode?im.decode():new Promise((res,rej)=>{im.onload=res; im.onerror=rej;}));
+    if(!im.naturalWidth) throw new Error('empty');
+    return {width:im.naturalWidth,height:im.naturalHeight,src:im};
+  }finally{setTimeout(()=>URL.revokeObjectURL(u),2000);}
+}
+async function loadPhoto(file){
+  if(!file||state.busy) return;
+  if(/^(video|audio|text)\//.test(file.type)){setStatus('That file is not a photo. Choose a photo from your camera roll or files.'); return;}
+  setStatus('Opening your photo.');
+  let bmp=null;
+  try{bmp=await decodePhoto(file);}
+  catch(e){
+    setStatus(/heic|heif/i.test(file.type+' '+file.name)
+      ?'This browser cannot open HEIC photos. Use Safari on iPhone, or take a screenshot of the photo and upload that.'
+      :'That photo could not be opened. Try a JPG or PNG.');
+    return;
+  }
+  const k=Math.min(1,1400/Math.max(bmp.width,bmp.height)), W=Math.max(2,Math.round(bmp.width*k)), H=Math.max(2,Math.round(bmp.height*k));
+  const c=document.createElement('canvas'); c.width=W; c.height=H; c.getContext('2d').drawImage(bmp.src||bmp,0,0,W,H);
+  if(bmp.close) bmp.close();
+  const blob=await new Promise(res=>c.toBlob(res,'image/jpeg',0.92));
+  clearPhoto(false);
+  state.photo={blob,url:URL.createObjectURL(blob),hash:await hashOf(file),name:file.name};
+  $('photo-name').textContent=file.name;
+  $('photo-btn').textContent='Change photo';
+  /* reopen anything already generated for this exact photo */
+  for(const item of ITEMS){
+    const saved=await looksDb.get(state.photo.hash+'|'+item.id);
+    if(saved&&saved.blob) state.results[item.id]={blob:saved.blob,url:URL.createObjectURL(saved.blob),model:saved.model,seconds:saved.seconds};
+  }
+  renderPieces(); renderLooks(); syncMirror();
+  setStatus(state.results[state.item]?'Welcome back. Your earlier try-ons are ready.':'Photo ready. Press Try it on.');
+}
+function clearPhoto(forget){
+  if(state.photo){
+    URL.revokeObjectURL(state.photo.url);
+    for(const id in state.results){const r=state.results[id]; if(r.blob) URL.revokeObjectURL(r.url); if(forget) looksDb.del(state.photo.hash+'|'+id);}
+  }
+  state.photo=null; state.results={}; state.showOriginal=false; $('chk-orig').checked=false;
+}
+function removePhoto(){
+  if(state.busy) return;
+  clearPhoto(true);
+  $('photo-name').textContent='You can also drop a photo onto the mirror.';
+  $('photo-btn').textContent='Upload photo';
+  $('photo-input').value='';
+  renderPieces(); renderLooks(); syncMirror(); setStatus('Photo and saved try-ons removed from this browser.');
+}
+
+/* ---------------------------------------------------------------- AI try-on */
+let gradio=null; const apps={};
+async function lib(){
+  if(!gradio){
+    try{gradio=await import(GRADIO_URL);}
+    catch(e){throw {code:'lib',message:'library'};}
+  }
+  return gradio;
+}
+async function connect(model){
+  const tok=store.get('fr.hfToken'), key=model.id+'|'+(tok||'');
+  if(!apps[key]){
+    const {Client}=await lib();
+    apps[key]=await Client.connect(model.space,tok?{token:tok}:{});
+  }
+  return apps[key];
+}
+function progress(on,label){
+  const veil=$('veil'), bar=$('bar');
+  clearInterval(progress.t);
+  if(!on){veil.hidden=true; bar.style.width='0'; return;}
+  const t0=Date.now(); veil.hidden=false;
+  const tick=()=>{const s=Math.round((Date.now()-t0)/1000); $('veil-text').textContent=label()+' '+s+' s'; bar.style.width=Math.min(96,s/45*100)+'%';};
+  tick(); progress.t=setInterval(tick,1000);
+}
+async function generate(item){
+  const order=state.model==='auto'?MODELS:MODELS.filter(m=>m.id===state.model);
+  const garment=(await loadGarment(item)).blob;
+  let last=null, stage='';
+  progress(true,()=>stage);
+  try{
+    for(const model of order){
+      const t0=Date.now();
+      try{
+        stage='Connecting to '+model.label+'.';
+        const app=await connect(model), {handle_file}=await lib();
+        stage='Generating with '+model.label+'. Usually 30 to 60 seconds.';
+        const out=await model.run(app,handle_file,state.photo.blob,garment,item);
+        const remote=typeof out==='string'?out:(out&&out.url);
+        if(!remote) throw new Error('no image came back');
+        let blob=null;
+        try{
+          const r=await fetch(remote);
+          if(r.ok){
+            blob=await r.blob();
+            /* keep a JPEG, so the saved file opens in any editor */
+            const bmp=await createImageBitmap(blob), c=document.createElement('canvas');
+            c.width=bmp.width; c.height=bmp.height; c.getContext('2d').drawImage(bmp,0,0);
+            const jpg=await new Promise(res=>c.toBlob(res,'image/jpeg',0.95)); if(jpg) blob=jpg;
+          }
+        }catch(e){}
+        return {blob,url:blob?URL.createObjectURL(blob):remote,model:model.label,seconds:Math.round((Date.now()-t0)/1000)};
+      }catch(e){
+        last=e;
+        if((e&&e.code==='lib')||/quota/i.test(errText(e))) break;   /* the same limits apply to every model */
+      }
+    }
+    throw last||new Error('no model available');
+  }finally{progress(false);}
+}
+function failureCopy(e){
+  const t=errText(e), hasToken=!!store.get('fr.hfToken');
+  if(e&&e.code==='lib') return 'The AI library could not be loaded. Check your internet connection and try again.';
+  if(/quota/i.test(t)) return hasToken?'Your free Hugging Face allowance for today is used up. It refills within a day.':'The shared free allowance is used up. Open AI settings and add a free Hugging Face token for your own daily allowance, or try again later.';
+  if(/garment|photo \d+/i.test(t)&&!/hf|space/i.test(t)) return 'The product photograph could not be loaded. Check your connection and try again.';
+  return 'The free AI model did not answer'+(t?' ('+t.slice(0,140)+')':'')+'. It can be busy. Wait a minute and try again, or pick another model under AI settings.';
+}
+async function tryOn(fresh){
+  if(state.busy) return;
+  const item=BY_ID[state.item];
+  if(!state.photo){setStatus('Upload a photo of yourself first.'); $('photo-btn').focus(); $('photo-btn').scrollIntoView({block:'center'}); return;}
+  $('mirror-wrap').scrollIntoView({block:'nearest'});
+  if(state.results[item.id]&&!fresh){state.showOriginal=false; $('chk-orig').checked=false; syncMirror(); setStatus('Showing the image made earlier for this photo.'); return;}
+  const forPhoto=state.photo;
+  state.busy=true; state.showOriginal=true; syncMirror(); setStatus('Working. Keep this tab open.');
+  try{
+    const r=await generate(item);
+    if(state.photo!==forPhoto) return;
+    const old=state.results[item.id]; if(old&&old.blob) URL.revokeObjectURL(old.url);
+    state.results[item.id]=r;
+    if(r.blob) looksDb.put(forPhoto.hash+'|'+item.id,{blob:r.blob,model:r.model,seconds:r.seconds});
+    setStatus('Done. This is an AI-generated image of you in the '+item.name+'.');
+  }catch(e){
+    if(state.photo===forPhoto) setStatus(failureCopy(e));
+    if(e&&!(e.code)) console.warn('try-on failed',e);
+  }finally{
+    state.busy=false; state.showOriginal=false; $('chk-orig').checked=false;
+    renderPieces(); renderLooks(); syncMirror();
+  }
+}
+
+/* ---------------------------------------------------------------- events */
+function syncToken(){
+  const has=!!store.get('fr.hfToken');
+  $('token-clear').hidden=!has;
+  $('in-token').placeholder=has?'Saved in this browser':'hf_…';
+}
+let offlineShown=false;
+function offline(what){
+  if(offlineShown) return; offlineShown=true;
+  const n=el('p',{class:'offline',role:'alert'});
+  n.textContent=what==='photos'
+    ?'The product photos could not load. This page needs an internet connection and must be opened in Chrome, Edge, Safari or Firefox. A file preview (in the Claude app, Files or Quick Look) blocks it. Download the file, then open it in your browser.'
+    :'The AI try-on service could not be reached from here. Open this page in Chrome, Edge, Safari or Firefox with internet on. A file preview (in the Claude app, Files or Quick Look) blocks it.';
+  document.querySelector('.notice').after(n);
+}
+function init(){
+  for(const s of TOP_SIZES) $('in-top').append(el('option',{value:s},s));
+  $('in-top').value=state.top;
+  $('in-model').append(el('option',{value:'auto'},'Automatic (recommended)'));
+  for(const m of MODELS) $('in-model').append(el('option',{value:m.id},m.label));
+  const savedModel=store.get('fr.model'); if(savedModel&&(savedModel==='auto'||MODELS.some(m=>m.id===savedModel))){state.model=savedModel;}
+  $('in-model').value=state.model;
+  renderGrid(); renderPieces(); renderFit(); renderLooks(); syncMirror(); syncToken();
+  lib().catch(()=>offline('ai'));
+
+  $('photo-btn').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault(); $('photo-input').click();}});
+  $('photo-input').addEventListener('change',e=>{loadPhoto(e.target.files&&e.target.files[0]); e.target.value='';});
+  $('photo-remove').addEventListener('click',removePhoto);
+  const frame=$('frame');
+  frame.addEventListener('dragover',e=>{e.preventDefault(); frame.classList.add('drop');});
+  frame.addEventListener('dragleave',()=>frame.classList.remove('drop'));
+  frame.addEventListener('drop',e=>{e.preventDefault(); frame.classList.remove('drop'); const f=e.dataTransfer&&e.dataTransfer.files&&e.dataTransfer.files[0]; if(f) loadPhoto(f);});
+
+  $('in-height').addEventListener('change',e=>{const v=Math.min(215,Math.max(140,Math.round(+e.target.value)||178)); e.target.value=String(v); state.height=v; renderFit();});
+  $('in-top').addEventListener('change',e=>{state.top=e.target.value; state.override={}; renderFit();});
+  $('in-model').addEventListener('change',e=>{state.model=e.target.value; store.set('fr.model',state.model);});
+
+  $('try').addEventListener('click',()=>tryOn(false));
+  $('again').addEventListener('click',()=>tryOn(true));
+  $('chk-orig').addEventListener('change',e=>{state.showOriginal=e.target.checked; syncMirror();});
+
+  $('token-save').addEventListener('click',()=>{
+    const v=$('in-token').value.trim();
+    if(!/^hf_[A-Za-z0-9]{20,}$/.test(v)){$('token-note').textContent='That does not look like a Hugging Face token. It starts with hf_ and comes from huggingface.co/settings/tokens.'; return;}
+    store.set('fr.hfToken',v); $('in-token').value=''; syncToken();
+    $('token-note').textContent='Token saved in this browser. Try-ons now use your own Hugging Face allowance.';
+  });
+  $('token-clear').addEventListener('click',()=>{store.del('fr.hfToken'); syncToken(); $('token-note').textContent='Token forgotten. Try-ons use the shared anonymous allowance again.';});
+}
+init();
+})();
+</script>
+</body>
+</html>
