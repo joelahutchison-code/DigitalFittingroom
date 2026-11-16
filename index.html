@@ -8,7 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400&family=Inter:wght@300;400&display=swap" rel="stylesheet">
 <style>
 :root{
-  /* Layout: wordmark alone top-left; five product tiles in one row; then a 320px form column beside the mirror, which takes the rest of the width. */
+  /* Layout: wordmark alone top-left; five product tiles in one row; then a 320px form column beside the mirror or the agent's working, which takes the rest of the width. */
   --canvas:#ffffff;
   --ink:#000000;
   --stone:#757575;
@@ -21,14 +21,13 @@
 *{box-sizing:border-box;border-radius:0}
 html{background:var(--canvas)}
 body{margin:0;background:var(--canvas);color:var(--ink);font-family:var(--font-ui);font-size:var(--t-body);line-height:1.5;font-weight:400;-webkit-font-smoothing:antialiased}
-h1,h2,h3,p,ul,dl,dd,dt,figure{margin:0;padding:0}
-ul{list-style:none}
+h1,h2,h3,p,ul,ol,dl,dd,dt,figure{margin:0;padding:0}
+ul,ol{list-style:none}
 h1,h2,h3{font-size:var(--t-body);font-weight:400;text-transform:uppercase}
 a{color:var(--ink)}
 .page{max-width:calc(1200px + 2*var(--edge));margin:0 auto;padding:var(--section) var(--edge)}
 .stone{color:var(--stone)}
 .file-input{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden}
-.visually-hidden{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 :focus-visible{outline:1px solid var(--ink);outline-offset:3px}
 [hidden]{display:none !important}
 
@@ -39,6 +38,7 @@ nav{display:flex;gap:var(--gap);flex-wrap:wrap}
 nav a{text-decoration:none;text-transform:uppercase}
 nav a:hover{text-decoration:underline}
 .notice{margin-top:32px;border-top:1px solid var(--ink);border-bottom:1px solid var(--ink);padding:12px 0;font-size:var(--t-cap);text-transform:uppercase;color:var(--stone)}
+.offline{border:1px solid var(--ink);padding:12px 16px;margin-top:20px}
 
 section{margin-top:var(--section)}
 .sec-head{display:flex;justify-content:space-between;align-items:baseline;gap:4px var(--gap);margin-bottom:var(--gap);flex-wrap:wrap}
@@ -46,9 +46,9 @@ section{margin-top:var(--section)}
 .grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:var(--gap)}
 .card{display:flex;flex-direction:column}
 .card .ph{display:block;width:100%;aspect-ratio:3/4;object-fit:cover;background:#f1f0ee}
-.offline{border:1px solid var(--ink);padding:12px 16px;margin-top:20px}
 .card .name{margin-top:12px}
-.card .meta{color:var(--stone);margin-bottom:12px}
+.card .meta{color:var(--stone)}
+.card .data{font-size:var(--t-cap);color:var(--stone);text-transform:uppercase;margin-bottom:12px}
 .card .btn{margin-top:auto;width:100%}
 
 .btn{display:inline-block;font:inherit;font-size:var(--t-body);text-transform:uppercase;color:var(--ink);background:transparent;border:1px solid var(--ink);padding:12px 20px;cursor:pointer;text-align:center;text-decoration:none}
@@ -61,7 +61,7 @@ section{margin-top:var(--section)}
 .step{display:grid;gap:12px}
 .step h3 .n{color:var(--stone);margin-right:12px;font-variant-numeric:tabular-nums}
 .help{font-size:var(--t-cap);color:var(--stone)}
-.row{display:flex;gap:16px;flex-wrap:wrap;align-items:baseline}
+.row{display:flex;gap:12px 16px;flex-wrap:wrap;align-items:baseline}
 .field{display:grid;gap:4px}
 .field span{font-size:var(--t-cap);text-transform:uppercase;color:var(--stone)}
 .field input[type=number],.field input[type=password],.field select{font:inherit;font-size:var(--t-body);color:var(--ink);background-color:transparent;border:0;border-bottom:1px solid var(--ink);padding:8px 0;width:100%;appearance:none;-webkit-appearance:none;-moz-appearance:textfield}
@@ -69,8 +69,9 @@ section{margin-top:var(--section)}
 .pieces li{border-bottom:1px solid var(--ink)}
 .pieces li:first-child{border-top:1px solid var(--ink)}
 .pieces label{display:grid;grid-template-columns:13px minmax(0,1fr) auto;gap:12px;padding:8px 0;align-items:center;cursor:pointer}
-.pieces input{appearance:none;-webkit-appearance:none;width:13px;height:13px;border:1px solid var(--ink);margin:0;background:transparent;cursor:pointer}
-.pieces input:checked{background:var(--ink)}
+.pieces input,.check input{appearance:none;-webkit-appearance:none;width:13px;height:13px;border:1px solid var(--ink);margin:0;background:transparent;flex:none;cursor:pointer}
+.pieces input:checked,.check input:checked{background:var(--ink)}
+.check{display:flex;gap:12px;align-items:center;cursor:pointer;text-transform:uppercase}
 .status{font-size:var(--t-sm);min-height:18px}
 .actions{display:grid;gap:12px}
 details summary{cursor:pointer;text-transform:uppercase;list-style:none}
@@ -82,7 +83,7 @@ details .inner{display:grid;gap:12px;padding-top:12px}
 .mirror-wrap{display:flex;gap:32px;align-items:flex-start;flex-wrap:wrap}
 .mirror{flex:0 1 520px;min-width:0;max-width:100%}
 .frame{position:relative;background:#f1f0ee;min-height:200px}
-.frame img{display:block;width:100%;height:auto;max-height:780px;object-fit:contain}
+.frame img,.frame video{display:block;width:100%;height:auto;max-height:780px;object-fit:contain}
 .frame.drop{outline:1px solid var(--ink);outline-offset:4px}
 .veil{position:absolute;inset:0;background:rgba(255,255,255,.82);display:flex;align-items:flex-end;padding:20px}
 .veil p{text-transform:uppercase;font-variant-numeric:tabular-nums}
@@ -99,9 +100,20 @@ details .inner{display:grid;gap:12px;padding-top:12px}
 .sizes button{font:inherit;background:none;border:0;padding:4px 0;color:var(--stone);cursor:pointer;text-transform:uppercase}
 .sizes button[aria-pressed="true"]{color:var(--ink);text-decoration:underline;text-underline-offset:4px}
 .verdict{text-transform:uppercase}
-.check{display:flex;gap:12px;align-items:center;cursor:pointer;text-transform:uppercase}
-.check input{appearance:none;-webkit-appearance:none;width:13px;height:13px;border:1px solid var(--ink);margin:0;background:transparent;flex:none;cursor:pointer}
-.check input:checked{background:var(--ink)}
+.tools .btn{width:100%}
+
+.sty-out{display:grid;gap:32px;max-width:720px}
+.trace{counter-reset:t;display:grid;gap:8px}
+.trace li{display:grid;grid-template-columns:24px minmax(0,1fr);gap:12px}
+.trace li::before{counter-increment:t;content:counter(t,decimal-leading-zero);color:var(--stone);font-variant-numeric:tabular-nums}
+.trace li.plain{grid-template-columns:minmax(0,1fr)}
+.trace li.plain::before{content:none}
+.outfit li{display:grid;grid-template-columns:48px minmax(0,1fr) auto;gap:12px;align-items:center;padding:8px 0;border-bottom:1px solid var(--ink)}
+.outfit li:first-child{border-top:1px solid var(--ink)}
+.outfit img{display:block;width:48px;height:64px;object-fit:cover;background:#f1f0ee}
+.totals{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 20px}
+.totals dt{font-size:var(--t-cap);text-transform:uppercase;color:var(--stone);padding-top:2px}
+.done{border:1px solid var(--ink);padding:16px;display:grid;gap:12px}
 
 .about{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--gap) var(--section)}
 .about div{display:grid;gap:12px;align-content:start}
@@ -129,15 +141,16 @@ footer{margin-top:var(--section);border-top:1px solid var(--ink);padding-top:12p
 <header class="top">
   <div>
     <h1 class="mark">The Fitting Room</h1>
-    <p class="cap">An AI virtual fitting room concept for Next</p>
+    <p class="cap">An AI virtual fitting room and stylist concept for Next</p>
   </div>
   <nav aria-label="Sections">
     <a href="#collection">Collection</a>
     <a href="#fitting-room">Fitting room</a>
+    <a href="#stylist">Stylist</a>
     <a href="#about">About this prototype</a>
   </nav>
 </header>
-<p class="notice">Student concept prototype. Not an official Next website. The pieces are stock photographs, and the names, prices and size chart are illustrative.</p>
+<p class="notice">Student concept prototype. Not an official Next website. The pieces are stock photographs, and the names, prices, stock, fit data and size chart are illustrative.</p>
 
 <section id="collection" aria-labelledby="h-col">
   <div class="sec-head">
@@ -150,7 +163,7 @@ footer{margin-top:var(--section);border-top:1px solid var(--ink);padding-top:12p
 <section id="fitting-room" aria-labelledby="h-fit">
   <div class="sec-head">
     <h2 id="h-fit">Fitting room</h2>
-    <p class="stone">SEE YOURSELF WEARING EACH PIECE</p>
+    <p class="stone">SEE YOURSELF IN EACH PIECE, IN EACH SIZE, STILL OR MOVING</p>
   </div>
   <div class="split">
     <div class="form">
@@ -159,11 +172,12 @@ footer{margin-top:var(--section);border-top:1px solid var(--ink);padding-top:12p
         <div class="row">
           <label class="btn" for="photo-input" id="photo-btn" tabindex="0" role="button">Upload photo</label>
           <input type="file" id="photo-input" class="file-input" accept="image/*">
-          <button type="button" class="link" id="photo-remove" hidden>Remove photo</button>
+          <button type="button" class="link" id="photo-remove" hidden>Remove photo and images</button>
         </div>
         <p class="help" id="photo-name">You can also drop a photo onto the mirror.</p>
         <p class="help">Works best facing the camera, waist-up or full length, in good light, with your arms clear of your body.</p>
-        <p class="help">When you press Try it on, your photo is sent to the AI model's public demo server on Hugging Face, which makes the image. Use only photos of yourself, or of someone who has agreed.</p>
+        <label class="check" for="chk-consent"><input type="checkbox" id="chk-consent"><span>I agree to send my photo to the AI models</span></label>
+        <p class="help">The photo goes to public AI demo servers on Hugging Face, which make the images. Use only photos of yourself, or of someone who has agreed. Remove photo deletes everything this page has kept.</p>
       </div>
 
       <div class="step">
@@ -185,12 +199,13 @@ footer{margin-top:var(--section);border-top:1px solid var(--ink);padding-top:12p
         <button type="button" class="btn" id="try">Try it on</button>
         <p class="status" id="status" role="status" aria-live="polite"></p>
         <button type="button" class="link" id="again" hidden>Generate a fresh image</button>
+        <p class="help">Each image uses free GPU time on Hugging Face. Without a token the shared allowance covers about three images a day. Add your free token under AI settings for more.</p>
       </div>
 
       <details id="settings">
         <summary>AI settings</summary>
         <div class="inner">
-          <label class="field" for="in-model"><span>AI model</span>
+          <label class="field" for="in-model"><span>Try-on model</span>
             <select id="in-model"></select>
           </label>
           <label class="field" for="in-token"><span>Hugging Face token (optional)</span>
@@ -209,20 +224,78 @@ footer{margin-top:var(--section);border-top:1px solid var(--ink);padding-top:12p
       <figure class="mirror">
         <div class="frame" id="frame">
           <img id="mirror-img" alt="">
+          <video id="mirror-video" hidden playsinline loop muted controls></video>
           <div class="veil" id="veil" hidden><span class="bar" id="bar"></span><p id="veil-text"></p></div>
         </div>
         <figcaption id="mirror-cap"></figcaption>
-        <ul class="looks" id="looks" aria-label="Pieces you have tried on"></ul>
+        <ul class="looks" id="looks" aria-label="Looks you have tried on"></ul>
       </figure>
       <div class="fit">
         <div class="block">
           <h3>Fit</h3>
           <div class="fit-item" id="fit-item"></div>
         </div>
-        <div class="block" id="tools">
+        <div class="block tools" id="tools">
+          <button type="button" class="btn" id="size-go" hidden>See this size on me</button>
+          <button type="button" class="btn" id="clip-go" hidden>Make runway clip</button>
+          <label class="check" id="lab-clip" hidden><input type="checkbox" id="chk-clip"><span>Play runway clip</span></label>
           <label class="check" id="lab-orig" hidden><input type="checkbox" id="chk-orig"><span>Show original photo</span></label>
-          <a class="btn" id="save" hidden download="fitting-room.jpg">Save image</a>
+          <button type="button" class="btn" id="share" hidden>Share</button>
+          <button type="button" class="btn" id="save" hidden>Save</button>
           <p class="help" id="made-by" hidden></p>
+          <button type="button" class="link" id="del-look" hidden>Delete this image</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="stylist" aria-labelledby="h-sty">
+  <div class="sec-head">
+    <h2 id="h-sty">Stylist</h2>
+    <p class="stone">AN AGENT PLANS THE OUTFIT. YOU APPROVE IT.</p>
+  </div>
+  <div class="split">
+    <div class="form">
+      <div class="step">
+        <h3><span class="n">01</span>Your brief</h3>
+        <label class="field" for="in-occasion"><span>Occasion</span>
+          <select id="in-occasion"></select>
+        </label>
+        <label class="field" for="in-budget"><span>Budget (£)</span>
+          <input type="number" id="in-budget" min="20" max="300" step="1" value="80" inputmode="numeric">
+        </label>
+        <p class="help" id="sty-size"></p>
+      </div>
+      <div class="actions">
+        <button type="button" class="btn" id="plan">Plan my outfit</button>
+        <p class="help">The agent only chooses from pieces in the collection. It never designs clothes, and it cannot order or take payment without your approval.</p>
+      </div>
+    </div>
+    <div class="sty-out">
+      <div class="block">
+        <h3>What the agent did</h3>
+        <ol class="trace" id="trace"></ol>
+      </div>
+      <div class="block" id="proposal" hidden>
+        <h3 id="prop-title">Proposed outfit</h3>
+        <ul class="outfit" id="prop-items"></ul>
+        <dl class="totals" id="prop-totals"></dl>
+        <div class="row" id="prop-actions">
+          <button type="button" class="btn" id="prop-try">Try the outfit on</button>
+          <button type="button" class="btn" id="prop-approve">Approve and order</button>
+          <button type="button" class="link" id="prop-next">Show another</button>
+        </div>
+        <p class="status" id="prop-status" role="status" aria-live="polite"></p>
+        <div class="done" id="prop-done" hidden>
+          <p class="verdict">Approved</p>
+          <p id="done-text"></p>
+          <div class="row">
+            <label class="field" for="ret-piece"><span>Return a piece</span><select id="ret-piece"></select></label>
+            <label class="field" for="ret-reason"><span>Reason</span><select id="ret-reason"><option>Too small</option><option>Too big</option><option>Not what I expected</option></select></label>
+          </div>
+          <button type="button" class="link" id="ret-go">Book the return</button>
+          <p class="help" id="ret-out"></p>
         </div>
       </div>
     </div>
@@ -234,21 +307,21 @@ footer{margin-top:var(--section);border-top:1px solid var(--ink);padding-top:12p
   <div class="about">
     <div>
       <h3>What runs live</h3>
-      <p>A virtual try-on AI model takes your photo and the photo of the piece and generates a new image of you wearing it, keeping your face, pose and background. Each image takes about half a minute. Images you have made are kept in this browser, so they reopen at once.</p>
+      <p>Three AI models. A try-on model generates a new image of you wearing the piece. An image-editing model redraws that image looser or tighter when you pick another size. A video model turns a look into a short runway clip. Everything you make is kept in this browser, so it reopens at once.</p>
     </div>
     <div>
-      <h3>What it cannot do yet</h3>
-      <p>The image shows cut, colour and drape on your body, but it does not change with the size you pick: the fit notes carry the size logic. Details the product photo does not show are guessed. The free model has a daily limit and can be busy. A retailer would run its own model on its own product, size and returns data.</p>
+      <h3>What is simulated</h3>
+      <p>Stock, prices, delivery, fit data and return-risk figures are invented to show the idea. The stylist follows written rules where a real agent would reason with a language model over Next's live catalogue, stock and order systems. Size images are AI illustrations of looser and tighter fits. They are not measured from the garment.</p>
     </div>
     <div>
       <h3>Your photo</h3>
-      <p>The photo goes from this browser to the model's public demo server on Hugging Face and nowhere else. This page has no server of its own. Generated images are stored only in this browser, and Remove photo clears them.</p>
+      <p>The photo and the images made from it go from this browser to public AI demo servers on Hugging Face and nowhere else. This page has no server of its own. Results are stored only in this browser, and Remove photo deletes them. Saved and shared images carry an AI-generated label.</p>
     </div>
   </div>
   <div class="credits">
     <h3>Credits</h3>
     <ul id="credits"></ul>
-    <p class="help">Product photographs are free to use under the Pexels licence. Try-on images are generated by open models published on Hugging Face.</p>
+    <p class="help">Product photographs are free to use under the Pexels licence. Images and clips are generated by open models published on Hugging Face.</p>
   </div>
 </section>
 
@@ -262,45 +335,60 @@ footer{margin-top:var(--section);border-top:1px solid var(--ink);padding-top:12p
 /* ---------------------------------------------------------------- data */
 const GRADIO_URL = 'https://cdn.jsdelivr.net/npm/@gradio/client@2.8.0/dist/index.min.js';
 const TOP_SIZES = ['XS','S','M','L','XL','XXL'];
-/* crop = [left, top, right, bottom] as fractions of the stock photograph: the part shown on the tile and sent to the model */
+const OCCASIONS = {smart:'Smart casual', weekend:'Weekend casual', cold:'Cold day layers'};
+/* crop = [left, top, right, bottom] as fractions of the stock photograph: the part shown on the tile and sent to the model.
+   runs = illustrative fit data: +1 runs small (size up), -1 runs large (size down). stock = illustrative units per size. */
 const ITEMS = [
-  {id:'tee',     name:'Cotton Crew T-Shirt',   colour:'White',      price:12, ease:10, pexels:12039633, by:'mockupbee',          page:'https://www.pexels.com/photo/white-t-shirt-on-white-surface-12039633/',                   crop:[0.2,0.04,0.87,0.96],  desc:'white short-sleeved crew-neck T-shirt'},
-  {id:'shirt',   name:'Linen Grandad Shirt',   colour:'Ecru',       price:34, ease:14, pexels:22441297, by:'dayong tien',        page:'https://www.pexels.com/photo/shirt-on-hanger-on-branch-22441297/',                        crop:[0,0.16,1,1],          desc:'ecru linen shirt with a grandad collar'},
-  {id:'hoodie',  name:'Brushed Cotton Hoodie', colour:'Dusty pink', price:32, ease:16, pexels:6786666,  by:'Artem Podrez',       page:'https://www.pexels.com/photo/a-person-holding-a-brown-hoodie-6786666/',                   crop:[0.02,0.3,1,0.97],     desc:'dusty pink pullover hoodie'},
-  {id:'cardigan',name:'Chunky Knit Cardigan',  colour:'Red',        price:45, ease:14, pexels:36129313, by:'Polina Chistyakova', page:'https://www.pexels.com/photo/bright-red-knit-cardigan-on-hanger-display-36129313/',       crop:[0.03,0.04,0.97,0.98], desc:'red chunky knit cardigan with buttons'},
-  {id:'jacket',  name:'Denim Chore Jacket',    colour:'Indigo',     price:55, ease:18, pexels:16428734, by:'James Frid',         page:'https://www.pexels.com/photo/denim-jacket-in-midair-16428734/',                           crop:[0.2,0.1,0.85,0.72],   desc:'indigo denim jacket'}
+  {id:'tee',     name:'Cotton Crew T-Shirt',   colour:'White',      price:12, ease:10, runs:0,  role:'base',  occ:{weekend:3,smart:1,cold:2}, stock:{XS:6,S:9,M:12,L:10,XL:7,XXL:3},
+   pexels:12039633, by:'mockupbee',          page:'https://www.pexels.com/photo/white-t-shirt-on-white-surface-12039633/',             crop:[0.2,0.04,0.87,0.96],  desc:'white short-sleeved crew-neck T-shirt'},
+  {id:'shirt',   name:'Linen Grandad Shirt',   colour:'Ecru',       price:34, ease:14, runs:0,  role:'base',  occ:{weekend:2,smart:3,cold:2}, stock:{XS:0,S:4,M:6,L:5,XL:2,XXL:1},
+   pexels:22441297, by:'dayong tien',        page:'https://www.pexels.com/photo/shirt-on-hanger-on-branch-22441297/',                  crop:[0,0.16,1,1],          desc:'ecru linen shirt with a grandad collar'},
+  {id:'hoodie',  name:'Brushed Cotton Hoodie', colour:'Dusty pink', price:32, ease:16, runs:1,  role:'mid',   occ:{weekend:3,smart:0,cold:3}, stock:{XS:3,S:5,M:0,L:4,XL:6,XXL:0},
+   pexels:6786666,  by:'Artem Podrez',       page:'https://www.pexels.com/photo/a-person-holding-a-brown-hoodie-6786666/',             crop:[0.02,0.3,1,0.97],     desc:'dusty pink pullover hoodie', wear:'worn over'},
+  {id:'cardigan',name:'Chunky Knit Cardigan',  colour:'Red',        price:45, ease:14, runs:-1, role:'mid',   occ:{weekend:2,smart:3,cold:3}, stock:{XS:2,S:0,M:5,L:3,XL:2,XXL:1},
+   pexels:36129313, by:'Polina Chistyakova', page:'https://www.pexels.com/photo/bright-red-knit-cardigan-on-hanger-display-36129313/', crop:[0.03,0.04,0.97,0.98], desc:'red chunky knit cardigan with buttons', wear:'worn open over'},
+  {id:'jacket',  name:'Denim Chore Jacket',    colour:'Indigo',     price:55, ease:18, runs:0,  role:'outer', occ:{weekend:3,smart:2,cold:2}, stock:{XS:1,S:3,M:2,L:4,XL:3,XXL:1},
+   pexels:16428734, by:'James Frid',         page:'https://www.pexels.com/photo/denim-jacket-in-midair-16428734/',                     crop:[0.2,0.1,0.85,0.72],   desc:'indigo denim jacket', wear:'worn open over'}
 ];
 const BY_ID = Object.fromEntries(ITEMS.map(i => [i.id, i]));
 
-/* Free try-on models hosted as Hugging Face Spaces. Each run() takes the person and garment images and returns the generated file. */
-const MODELS = [
+/* Free AI models hosted as Hugging Face Spaces. */
+const TRYON = [
   {id:'fashn', label:'FASHN VTON 1.5', space:'fashn-ai/fashn-vton-1.5',
-    run:async(app,file,person,garment)=>{
-      const r=await app.predict('/try_on',{person_image:file(person),garment_image:file(garment),category:'tops',garment_photo_type:'flat-lay',num_timesteps:50,guidance_scale:1.5,seed:42,segmentation_free:true});
-      return r.data[0];
-    }},
+    run:(app,file,person,garment)=>app.predict('/try_on',{person_image:file(person),garment_image:file(garment),category:'tops',garment_photo_type:'flat-lay',num_timesteps:50,guidance_scale:1.5,seed:42,segmentation_free:true}).then(r=>r.data[0])},
   {id:'leffa', label:'Leffa', space:'franciszzj/Leffa',
-    run:async(app,file,person,garment)=>{
-      const r=await app.predict('/leffa_predict_vt',{src_image_path:file(person),ref_image_path:file(garment),ref_acceleration:'False',step:30,scale:2.5,seed:42,vt_model_type:'viton_hd',vt_garment_type:'upper_body',vt_repaint:'False'});
-      return r.data[0];
-    }},
+    run:(app,file,person,garment)=>app.predict('/leffa_predict_vt',{src_image_path:file(person),ref_image_path:file(garment),ref_acceleration:'False',step:30,scale:2.5,seed:42,vt_model_type:'viton_hd',vt_garment_type:'upper_body',vt_repaint:'False'}).then(r=>r.data[0])},
   {id:'idm', label:'IDM-VTON', space:'yisol/IDM-VTON',
-    run:async(app,file,person,garment,item)=>{
-      const r=await app.predict('/tryon',{dict:{background:file(person),layers:[],composite:null},garm_img:file(garment),garment_des:item.desc,is_checked:true,is_checked_crop:true,denoise_steps:30,seed:42});
-      return r.data[0];
-    }}
+    run:(app,file,person,garment,item)=>app.predict('/tryon',{dict:{background:file(person),layers:[],composite:null},garm_img:file(garment),garment_des:item.desc,is_checked:true,is_checked_crop:true,denoise_steps:30,seed:42}).then(r=>r.data[0])}
 ];
+/* image editors: inputs in order are prompt, images, mode, seed, random seed, width, height, steps, guidance, prompt upsampling */
+const EDITORS = [
+  {id:'klein9', label:'FLUX.2 klein 9B', space:'black-forest-labs/FLUX.2-klein-9B', ep:'/generate'},
+  {id:'klein4', label:'FLUX.2 klein 4B', space:'black-forest-labs/FLUX.2-klein-4B', ep:'/infer'}
+];
+/* image to video: inputs in order are image, prompt, steps, negative prompt, seconds, guidance, guidance 2, seed, random seed */
+const VIDEO = [{id:'wan', label:'Wan 2.2', space:'zerogpu-aoti/wan2-2-fp8da-aoti-faster', ep:'/generate_video'}];
+const VIDEO_NEGATIVE = '色调艳丽, 过曝, 静态, 细节模糊不清, 字幕, 风格, 作品, 画作, 画面, 静止, 整体发灰, 最差质量, 低质量, JPEG压缩残留, 丑陋的, 残缺的, 多余的手指, 画得不好的手部, 画得不好的脸部, 畸形的, 毁容的, 形态畸形的肢体, 手指融合, 静止不动的画面, 杂乱的背景, 三条腿, 背景人很多, 倒着走';
+const FIT_PHRASE = {
+  '2':'two sizes too big: clearly oversized and baggy, with extra fabric hanging loose around the chest and waist, the shoulder seams dropped down onto the upper arms, wider and longer sleeves, and the hem hanging lower',
+  '1':'one size too big: slightly loose, with a little extra room around the chest and waist, sleeves a touch longer and the hem slightly lower',
+  '-1':'one size too small: snug and close to the body across the chest, shoulders and stomach, with the sleeves and the hem slightly shorter',
+  '-2':'two sizes too small: tight, with the fabric stretched across the chest and stomach and showing pull lines, the shoulder seams sitting too high, clearly short sleeves, and the hem riding up at the waist'
+};
 
 const state = {
-  photo:null,           // {blob,url,hash,name}
-  item:'hoodie',
+  photo:null,                  // {blob,url,hash,name}
+  item:'hoodie', view:'item', outfit:null,     // outfit = ids of the pieces in the outfit on show
   height:178, top:'M', override:{},
-  results:{},           // item id -> {url, blob, model, seconds}
-  showOriginal:false, busy:false, model:'auto'
+  looks:{},                    // key -> {url, blob, model, seconds, clip:{url,blob,model}}
+  showOriginal:false, playClip:false, busy:false, model:'auto',
+  occasion:'smart', budget:80, planIndex:0, plan:null, approved:false
 };
 
 /* ---------------------------------------------------------------- helpers */
 const $ = id => document.getElementById(id);
+const idx = s => TOP_SIZES.indexOf(s);
+const clamp = (v,lo,hi) => Math.min(hi,Math.max(lo,v));
 function el(tag,attrs,text){const n=document.createElement(tag);if(attrs)for(const k in attrs){if(k==='class')n.className=attrs[k];else n.setAttribute(k,attrs[k]);}if(text!==undefined)n.textContent=text;return n;}
 function setStatus(t){$('status').textContent=t||'';}
 function errText(e){if(!e)return'';if(typeof e==='string')return e;return String(e.message||e.title||e.detail||e.error||e);}
@@ -309,7 +397,7 @@ const store={
   set(k,v){try{localStorage.setItem(k,v);}catch(e){}},
   del(k){try{localStorage.removeItem(k);}catch(e){}}
 };
-/* generated images are kept in this browser so they reopen at once */
+/* everything generated is kept in this browser so it reopens at once */
 const looksDb={
   db:null,
   open(){
@@ -327,13 +415,23 @@ const looksDb={
       return await new Promise((res,rej)=>{const t=db.transaction('looks',mode), q=fn(t.objectStore('looks')); t.oncomplete=()=>res(q&&q.result); t.onerror=()=>rej(t.error);});
     }catch(e){return undefined;}
   },
-  get(k){return this.tx('readonly',s=>s.get(k));},
   put(k,v){return this.tx('readwrite',s=>s.put(v,k));},
-  del(k){return this.tx('readwrite',s=>s.delete(k));}
+  del(k){return this.tx('readwrite',s=>s.delete(k));},
+  async all(prefix){
+    try{
+      const db=await this.open();
+      return await new Promise((res,rej)=>{
+        const out=[], t=db.transaction('looks','readonly'), rq=t.objectStore('looks').openCursor(IDBKeyRange.bound(prefix,prefix+'￿'));
+        rq.onsuccess=()=>{const c=rq.result; if(c){out.push([c.key,c.value]); c.continue();}};
+        t.oncomplete=()=>res(out); t.onerror=()=>rej(t.error);
+      });
+    }catch(e){return [];}
+  }
 };
 
 /* ---------------------------------------------------------------- product photographs */
 function pexelsUrl(id,w){return 'https://images.pexels.com/photos/'+id+'/pexels-photo-'+id+'.jpeg?auto=compress&cs=tinysrgb&w='+(w||1200);}
+function focus(item){return Math.round((item.crop[0]+item.crop[2])*50)+'% '+Math.round((item.crop[1]+item.crop[3])*50)+'%';}
 function loadGarment(item){
   if(item._g) return item._g;
   item._g=(async()=>{
@@ -345,48 +443,60 @@ function loadGarment(item){
     const sw=Math.max(1,Math.min(bmp.width-sx,Math.round(bmp.width*(x1-x0)))), sh=Math.max(1,Math.min(bmp.height-sy,Math.round(bmp.height*(y1-y0))));
     const c=document.createElement('canvas'); c.width=sw; c.height=sh;
     c.getContext('2d').drawImage(bmp,sx,sy,sw,sh,0,0,sw,sh);
-    const blob=await new Promise(res=>c.toBlob(res,'image/jpeg',0.92));
-    return {canvas:c,blob,url:URL.createObjectURL(blob)};
+    return {blob:await new Promise(res=>c.toBlob(res,'image/jpeg',0.92))};
   })();
   item._g.catch(()=>{item._g=null;});
   return item._g;
 }
-function drawTile(canvas,g){
-  const ctx=canvas.getContext('2d'), W=canvas.width, H=canvas.height, src=g.canvas;
-  const px=src.getContext('2d').getImageData(2,2,1,1).data;
-  ctx.fillStyle='rgb('+px[0]+','+px[1]+','+px[2]+')'; ctx.fillRect(0,0,W,H);
-  const k=Math.min(W/src.width,H/src.height), w=src.width*k, h=src.height*k;
-  ctx.drawImage(src,(W-w)/2,(H-h)/2,w,h);
+
+/* ---------------------------------------------------------------- size and fit */
+function recSize(item){return TOP_SIZES[clamp(idx(state.top)+item.runs,0,TOP_SIZES.length-1)];}
+function sizeOf(item){return state.override[item.id]||recSize(item);}
+function netEase(item,size){return item.ease+5*(idx(size)-idx(state.top)-item.runs);}
+function stepsFromRec(item,size){return idx(size)-idx(recSize(item));}
+function verdictOf(item,size){
+  const e=item.ease, net=netEase(item,size);
+  if(net<4) return {code:'tight',label:'Too tight',line:(net<=0?'No room':'Only '+net+' cm of room')+' at the chest. Expect pulling across the chest and shoulders.'};
+  if(net<e-2.5) return {code:'close',label:'Close fit',line:net+' cm of room at the chest, '+(e-net)+' cm less than designed.'};
+  if(net<=e+2.5) return {code:'regular',label:'Regular fit',line:net+' cm of room at the chest, as designed.'};
+  if(net<=e+7.5) return {code:'relaxed',label:'Relaxed fit',line:net+' cm of room at the chest, '+(net-e)+' cm more than designed. The shoulder seam drops slightly.'};
+  return {code:'over',label:'Oversized',line:net+' cm of room at the chest, '+(net-e)+' cm more than designed.'};
+}
+function riskOf(item,size){
+  const d=Math.abs(stepsFromRec(item,size));
+  return d===0?{label:'Low',keep:'9 in 10'}:d===1?{label:'Medium',keep:'6 in 10'}:{label:'High',keep:'2 in 10'};
+}
+function runsText(item){return item.runs>0?'Runs small':item.runs<0?'Runs large':'True to size';}
+
+/* ---------------------------------------------------------------- looks */
+function itemKey(item,size){const d=clamp(stepsFromRec(item,size),-2,2); return item.id+'|'+(d===0?'base':'d'+d);}
+function curKey(){
+  if(state.view==='outfit'&&state.outfit) return 'outfit|'+state.outfit.join('+');
+  const item=BY_ID[state.item]; return itemKey(item,sizeOf(item));
+}
+function saveLook(key,r){
+  const old=state.looks[key];
+  if(old){ if(old.blob) URL.revokeObjectURL(old.url); if(old.clip) URL.revokeObjectURL(old.clip.url); looksDb.del(state.photo.hash+'|'+key+'|clip'); }
+  state.looks[key]=r;
+  if(r.blob) looksDb.put(state.photo.hash+'|'+key,{blob:r.blob,model:r.model,seconds:r.seconds});
+}
+function dropLook(key){
+  const old=state.looks[key]; if(!old) return;
+  if(old.blob) URL.revokeObjectURL(old.url); if(old.clip) URL.revokeObjectURL(old.clip.url);
+  delete state.looks[key];
+  looksDb.del(state.photo.hash+'|'+key); looksDb.del(state.photo.hash+'|'+key+'|clip');
 }
 
-/* ---------------------------------------------------------------- fit notes */
-function sizeOf(item){return state.override[item.id]!==undefined?state.override[item.id]:state.top;}
-function fitCopy(item,size){
-  const d=TOP_SIZES.indexOf(size)-TOP_SIZES.indexOf(state.top), e=item.ease, net=e+5*d, out={verdict:'',lines:[],rec:''};
-  if(net<4){out.verdict='Too tight'; out.lines.push((net<=0?'No room':'Only '+net+' cm of room')+' at the chest. Expect pulling across the chest and shoulders.');}
-  else if(net<e-2.5){out.verdict='Close fit'; out.lines.push(net+' cm of room at the chest, '+(e-net)+' cm less than designed.');}
-  else if(net<=e+2.5){out.verdict='Regular fit'; out.lines.push(net+' cm of room at the chest, as designed.');}
-  else if(net<=e+7.5){out.verdict='Relaxed fit'; out.lines.push(net+' cm of room at the chest, '+(net-e)+' cm more than designed. The shoulder seam drops slightly.');}
-  else{out.verdict='Oversized'; out.lines.push(net+' cm of room at the chest, '+(net-e)+' cm more than designed.');}
-  if(d!==0) out.lines.push('Body '+Math.abs(1.5*d)+' cm '+(d>0?'longer':'shorter')+' and sleeves '+Math.abs(d)+' cm '+(d>0?'longer':'shorter')+' than your usual size.');
-  if(state.height>=188) out.lines.push('At '+state.height+' cm, body and sleeves may sit short. Choose a Tall length where one is offered.');
-  else if(state.height<=167) out.lines.push('At '+state.height+' cm, body and sleeves may run long.');
-  out.rec='Recommended for you: '+state.top;
-  return out;
-}
-
-/* ---------------------------------------------------------------- interface */
+/* ---------------------------------------------------------------- collection and fitting room interface */
 function renderGrid(){
   const grid=$('grid'); grid.textContent='';
   for(const item of ITEMS){
     const li=el('li',{class:'card'});
-    /* a plain image: loads wherever the page has internet, with no script or cross-site permission needed */
-    const cx=Math.round((item.crop[0]+item.crop[2])*50), cy=Math.round((item.crop[1]+item.crop[3])*50);
-    const cv=el('img',{class:'ph',src:pexelsUrl(item.pexels,800),alt:item.colour+' '+item.name.toLowerCase(),style:'object-position:'+cx+'% '+cy+'%'});
-    cv.addEventListener('error',()=>offline('photos'),{once:true});
+    const ph=el('img',{class:'ph',src:pexelsUrl(item.pexels,800),alt:item.colour+' '+item.name.toLowerCase(),style:'object-position:'+focus(item)});
+    ph.addEventListener('error',()=>offline('photos'),{once:true});
     const b=el('button',{type:'button',class:'btn'},'Try it on');
-    b.addEventListener('click',()=>{selectItem(item.id); $('fitting-room').scrollIntoView({block:'start'}); if(state.photo) tryOn(false);});
-    li.append(cv,el('p',{class:'name'},item.name),el('p',{class:'meta'},item.colour+' · £'+item.price),b);
+    b.addEventListener('click',()=>{selectItem(item.id); $('fitting-room').scrollIntoView({block:'start'}); if(state.photo) actTryOn(false);});
+    li.append(ph,el('p',{class:'name'},item.name),el('p',{class:'meta'},item.colour+' · £'+item.price),el('p',{class:'data'},runsText(item)),b);
     grid.append(li);
   }
   const cr=$('credits');
@@ -394,8 +504,8 @@ function renderGrid(){
     const li=el('li'); li.append(document.createTextNode(item.name+': photograph by '+item.by+' on '));
     li.append(el('a',{href:item.page,rel:'noopener'},'Pexels')); cr.append(li);
   }
-  for(const m of MODELS){
-    const li=el('li'); li.append(document.createTextNode('AI model: '+m.label+', '));
+  for(const [what,list] of [['Try-on model',TRYON],['Size redraw model',EDITORS],['Runway clip model',VIDEO]]) for(const m of list){
+    const li=el('li'); li.append(document.createTextNode(what+': '+m.label+', '));
     li.append(el('a',{href:'https://huggingface.co/spaces/'+m.space,rel:'noopener'},'huggingface.co/spaces/'+m.space)); cr.append(li);
   }
 }
@@ -404,62 +514,104 @@ function renderPieces(){
   for(const item of ITEMS){
     const li=el('li'), lab=el('label');
     const inp=el('input',{type:'radio',name:'piece',value:item.id,id:'piece-'+item.id});
-    inp.checked=state.item===item.id;
+    inp.checked=state.view==='item'&&state.item===item.id;
     inp.addEventListener('change',()=>selectItem(item.id));
-    lab.append(inp,el('span',null,item.name),el('span',{class:'stone'},state.results[item.id]?'Tried on':''));
+    lab.append(inp,el('span',null,item.name),el('span',{class:'stone'},state.looks[item.id+'|base']?'Tried on':''));
     li.append(lab); ul.append(li);
   }
 }
 function renderFit(){
   const box=$('fit-item'); box.textContent='';
-  const item=BY_ID[state.item], size=sizeOf(item), copy=fitCopy(item,size);
+  if(state.view==='outfit'&&state.outfit){
+    box.append(el('p',null,'Outfit from the stylist'));
+    for(const id of state.outfit){
+      const item=BY_ID[id], p=resolvePiece(item)||{size:recSize(item)};
+      box.append(el('p',{class:'help'},item.name+', size '+p.size+': '+verdictOf(item,p.size).label.toLowerCase()+'.'));
+    }
+    const back=el('button',{type:'button',class:'link'},'Back to single pieces');
+    back.addEventListener('click',()=>selectItem(state.item));
+    box.append(back);
+    return;
+  }
+  const item=BY_ID[state.item], size=sizeOf(item), rec=recSize(item), v=verdictOf(item,size), risk=riskOf(item,size), d=stepsFromRec(item,size);
   box.append(el('p',null,item.name+', '+item.colour));
   const sz=el('div',{class:'sizes',role:'group','aria-label':'Size for '+item.name});
   for(const s of TOP_SIZES){
     const b=el('button',{type:'button','aria-pressed':String(s===size)},s);
-    b.addEventListener('click',()=>{state.override[item.id]=s; renderFit();});
+    b.addEventListener('click',()=>{state.override[item.id]=s; state.showOriginal=false; state.playClip=false; syncAll(); sizeHint();});
     sz.append(b);
   }
-  box.append(sz,el('p',{class:'verdict'},copy.verdict));
-  for(const l of copy.lines) box.append(el('p',{class:'help'},l));
-  box.append(el('p',{class:'help'},copy.rec));
-  box.append(el('p',{class:'help'},'The image shows the cut and colour on you. It does not change with size, so read the size from these notes.'));
+  box.append(sz,el('p',{class:'verdict'},v.label),el('p',{class:'help'},v.line));
+  if(d!==0) box.append(el('p',{class:'help'},'Body '+Math.abs(1.5*d)+' cm '+(d>0?'longer':'shorter')+' and sleeves '+Math.abs(d)+' cm '+(d>0?'longer':'shorter')+' than your recommended size.'));
+  if(state.height>=188) box.append(el('p',{class:'help'},'At '+state.height+' cm, body and sleeves may sit short. Choose a Tall length where one is offered.'));
+  else if(state.height<=167) box.append(el('p',{class:'help'},'At '+state.height+' cm, body and sleeves may run long.'));
+  box.append(el('p',{class:'verdict'},'Return risk: '+risk.label));
+  box.append(el('p',{class:'help'},'About '+risk.keep+' shoppers with your size and height keep this piece in '+size+'. Illustrative figure.'));
+  box.append(el('p',{class:'help'},'Recommended for you: '+rec+'.'+(item.runs!==0?' This piece runs '+(item.runs>0?'small':'large')+', so that is one '+(item.runs>0?'up':'down')+' from your usual '+state.top+'.':'')));
+  const stock=item.stock[size];
+  box.append(el('p',{class:'help'},stock>0?(stock<=2?'Only '+stock+' left in '+size+'.':'In stock in '+size+'.'):'Out of stock in '+size+'.'));
 }
 function renderLooks(){
   const ul=$('looks'); ul.textContent='';
-  for(const item of ITEMS){
-    const r=state.results[item.id]; if(!r) continue;
-    const li=el('li'), b=el('button',{type:'button','aria-pressed':String(state.item===item.id)});
-    b.append(el('img',{src:r.url,alt:''}),el('span',null,item.name.split(' ').slice(-1)[0]));
-    b.addEventListener('click',()=>selectItem(item.id));
-    li.append(b); ul.append(li);
+  const add=(key,label,on,go)=>{
+    const r=state.looks[key]; if(!r) return;
+    const li=el('li'), b=el('button',{type:'button','aria-pressed':String(on)});
+    b.append(el('img',{src:r.url,alt:''}),el('span',null,label)); b.addEventListener('click',go); li.append(b); ul.append(li);
+  };
+  for(const item of ITEMS) add(item.id+'|base',item.name.split(' ').slice(-1)[0],state.view==='item'&&state.item===item.id,()=>selectItem(item.id));
+  for(const key in state.looks) if(key.startsWith('outfit|')){
+    const ids=key.slice(7).split('+').filter(i=>BY_ID[i]); if(!ids.length) continue;
+    add(key,'Outfit',state.view==='outfit'&&state.outfit&&state.outfit.join('+')===ids.join('+'),()=>{state.view='outfit'; state.outfit=ids; state.showOriginal=false; state.playClip=false; syncAll();});
   }
+}
+function lookName(){
+  if(state.view==='outfit'&&state.outfit){const n=state.outfit.map(i=>BY_ID[i].name); return 'the '+(n.length>1?n.slice(0,-1).join(', ')+' and '+n[n.length-1]:n[0]);}
+  return 'the '+BY_ID[state.item].name;
 }
 function syncMirror(){
-  const item=BY_ID[state.item], r=state.results[item.id], img=$('mirror-img');
-  let cap='';
-  if(state.photo&&r&&!state.showOriginal){img.src=r.url; img.alt='You wearing the '+item.name; cap='You in the '+item.name+'. Generated by AI.';}
-  else if(state.photo){img.src=state.photo.url; img.alt='Your photo'; cap=r?'Your original photo':'Your photo. Press Try it on.';}
-  else{
-    cap=item.name+'. Upload your photo to see it on you.'; img.alt=item.colour+' '+item.name;
-    img.src=pexelsUrl(item.pexels,1200);
+  const img=$('mirror-img'), vid=$('mirror-video'), item=BY_ID[state.item];
+  const key=curKey(), look=state.looks[key], base=state.view==='item'?state.looks[item.id+'|base']:null;
+  const size=sizeOf(item), d=state.view==='item'?clamp(stepsFromRec(item,size),-2,2):0;
+  let cap='', showVideo=false;
+  if(state.photo&&look&&!state.showOriginal){
+    if(look.clip&&state.playClip){showVideo=true; if(vid.src!==look.clip.url){vid.src=look.clip.url;} cap='Runway clip of you in '+lookName()+'. Generated by AI.';}
+    else{img.src=look.url; img.alt='You wearing '+lookName(); cap=(state.view==='item'?'You in '+lookName()+', size '+size+'. ':'You in '+lookName()+'. ')+(d!==0?'AI illustration of this fit.':'Generated by AI.');}
+  }else if(state.photo&&base&&!state.showOriginal){
+    img.src=base.url; img.alt='You wearing '+lookName(); cap='Shown in your recommended size '+recSize(item)+'. Press See size '+size+' on me to redraw it.';
+  }else if(state.photo){
+    img.src=state.photo.url; img.alt='Your photo'; cap=(look||base)?'Your original photo':'Your photo. Press Try it on.';
+  }else{
+    img.src=pexelsUrl(item.pexels,1200); img.alt=item.colour+' '+item.name; cap=item.name+'. Upload your photo to see it on you.';
   }
+  vid.hidden=!showVideo; img.hidden=showVideo;
+  if(showVideo){const p=vid.play(); if(p&&p.catch) p.catch(()=>{});} else if(!vid.paused) vid.pause();
   $('mirror-cap').textContent=cap;
-  $('lab-orig').hidden=!(state.photo&&r);
-  const save=$('save'), made=$('made-by');
-  if(state.photo&&r){
-    save.hidden=false; save.href=r.url; save.download='fitting-room-'+item.id+'.jpg';
-    if(!r.blob){save.removeAttribute('download'); save.target='_blank'; save.rel='noopener';} else {save.removeAttribute('target');}
-    made.hidden=false; made.textContent='Made by '+r.model+(r.seconds?' in '+r.seconds+' seconds':'')+'.';
-  }else{save.hidden=true; made.hidden=true;}
-  $('again').hidden=!(state.photo&&r)||state.busy;
+
+  const shown=look||base, on=!!(state.photo&&!state.busy);
+  $('size-go').hidden=!(on&&state.view==='item'&&base&&base.blob&&d!==0&&!look);
+  $('size-go').textContent='See size '+size+' on me';
+  $('clip-go').hidden=!(on&&look&&look.blob&&!look.clip);
+  $('lab-clip').hidden=!(state.photo&&look&&look.clip); $('chk-clip').checked=state.playClip;
+  $('lab-orig').hidden=!(state.photo&&shown); $('chk-orig').checked=state.showOriginal;
+  $('share').hidden=$('save').hidden=!(state.photo&&look);
+  const made=$('made-by');
+  if(state.photo&&look){made.hidden=false; made.textContent='Made by '+(showVideo?look.clip.model:look.model)+(look.seconds&&!showVideo?' in '+look.seconds+' seconds':'')+'.';} else made.hidden=true;
+  $('again').hidden=!(on&&shown);
+  $('del-look').hidden=!(on&&look); $('del-look').textContent=showVideo?'Delete this clip':'Delete this image';
   $('photo-remove').hidden=!state.photo;
-  $('try').disabled=state.busy;
+  for(const id of ['try','plan','prop-try']) $(id).disabled=state.busy;
+}
+function syncAll(){renderPieces(); renderFit(); renderLooks(); syncMirror(); $('sty-size').textContent='Uses your size from the fitting room: '+state.top+', '+state.height+' cm.';}
+function sizeHint(){
+  if(state.busy||state.view!=='item') return;
+  const item=BY_ID[state.item], size=sizeOf(item);
+  if(!state.photo){setStatus(''); return;}
+  if(!state.looks[item.id+'|base']){setStatus('Press Try it on to see this piece on you.'); return;}
+  setStatus(state.looks[curKey()]?'':'Press See size '+size+' on me to see how this size sits.');
 }
 function selectItem(id){
-  state.item=id; state.showOriginal=false; $('chk-orig').checked=false;
-  renderPieces(); renderFit(); renderLooks(); syncMirror();
-  if(!state.busy) setStatus(state.photo?(state.results[id]?'':'Press Try it on to see this piece on you.'):'');
+  state.item=id; state.view='item'; state.showOriginal=false; state.playClip=false;
+  syncAll(); sizeHint();
 }
 
 /* ---------------------------------------------------------------- photo */
@@ -497,22 +649,30 @@ async function loadPhoto(file){
   const blob=await new Promise(res=>c.toBlob(res,'image/jpeg',0.92));
   clearPhoto(false);
   state.photo={blob,url:URL.createObjectURL(blob),hash:await hashOf(file),name:file.name};
-  $('photo-name').textContent=file.name;
+  $('photo-name').textContent=file.name||'Photo added';
   $('photo-btn').textContent='Change photo';
   /* reopen anything already generated for this exact photo */
-  for(const item of ITEMS){
-    const saved=await looksDb.get(state.photo.hash+'|'+item.id);
-    if(saved&&saved.blob) state.results[item.id]={blob:saved.blob,url:URL.createObjectURL(saved.blob),model:saved.model,seconds:saved.seconds};
+  const saved=await looksDb.all(state.photo.hash+'|'), clips=[];
+  for(const [k2,v] of saved){
+    if(!v||!v.blob) continue;
+    const parts=String(k2).slice(state.photo.hash.length+1).split('|');
+    if(parts[parts.length-1]==='clip'){clips.push([parts.slice(0,-1).join('|'),v]); continue;}
+    const key=parts.length===1&&BY_ID[parts[0]]?parts[0]+'|base':parts.join('|');
+    state.looks[key]={blob:v.blob,url:URL.createObjectURL(v.blob),model:v.model,seconds:v.seconds};
   }
-  renderPieces(); renderLooks(); syncMirror();
-  setStatus(state.results[state.item]?'Welcome back. Your earlier try-ons are ready.':'Photo ready. Press Try it on.');
+  for(const [key,v] of clips) if(state.looks[key]) state.looks[key].clip={blob:v.blob,url:URL.createObjectURL(v.blob),model:v.model};
+  state.view='item'; syncAll();
+  setStatus(Object.keys(state.looks).length?'Welcome back. Your earlier try-ons are ready.':'Photo ready. Press Try it on.');
 }
 function clearPhoto(forget){
   if(state.photo){
     URL.revokeObjectURL(state.photo.url);
-    for(const id in state.results){const r=state.results[id]; if(r.blob) URL.revokeObjectURL(r.url); if(forget) looksDb.del(state.photo.hash+'|'+id);}
+    for(const key in state.looks){
+      const r=state.looks[key]; if(r.blob) URL.revokeObjectURL(r.url); if(r.clip) URL.revokeObjectURL(r.clip.url);
+      if(forget){looksDb.del(state.photo.hash+'|'+key); looksDb.del(state.photo.hash+'|'+key+'|clip'); if(key.endsWith('|base')) looksDb.del(state.photo.hash+'|'+key.slice(0,-5));}
+    }
   }
-  state.photo=null; state.results={}; state.showOriginal=false; $('chk-orig').checked=false;
+  state.photo=null; state.looks={}; state.showOriginal=false; state.playClip=false; state.view='item'; state.outfit=null;
 }
 function removePhoto(){
   if(state.busy) return;
@@ -520,10 +680,10 @@ function removePhoto(){
   $('photo-name').textContent='You can also drop a photo onto the mirror.';
   $('photo-btn').textContent='Upload photo';
   $('photo-input').value='';
-  renderPieces(); renderLooks(); syncMirror(); setStatus('Photo and saved try-ons removed from this browser.');
+  syncAll(); setStatus('Photo and everything made from it removed from this browser.');
 }
 
-/* ---------------------------------------------------------------- AI try-on */
+/* ---------------------------------------------------------------- AI calls */
 let gradio=null; const apps={};
 async function lib(){
   if(!gradio){
@@ -533,85 +693,316 @@ async function lib(){
   return gradio;
 }
 async function connect(model){
-  const tok=store.get('fr.hfToken'), key=model.id+'|'+(tok||'');
+  const tok=store.get('fr.hfToken'), key=model.space+'|'+(tok||'');
   if(!apps[key]){
     const {Client}=await lib();
     apps[key]=await Client.connect(model.space,tok?{token:tok}:{});
   }
   return apps[key];
 }
-function progress(on,label){
+function progress(on,label,expect){
   const veil=$('veil'), bar=$('bar');
   clearInterval(progress.t);
   if(!on){veil.hidden=true; bar.style.width='0'; return;}
   const t0=Date.now(); veil.hidden=false;
-  const tick=()=>{const s=Math.round((Date.now()-t0)/1000); $('veil-text').textContent=label()+' '+s+' s'; bar.style.width=Math.min(96,s/45*100)+'%';};
+  const tick=()=>{const s=Math.round((Date.now()-t0)/1000); $('veil-text').textContent=label()+' '+s+' s'; bar.style.width=Math.min(96,s/(expect||45)*100)+'%';};
   tick(); progress.t=setInterval(tick,1000);
 }
-async function generate(item){
-  const order=state.model==='auto'?MODELS:MODELS.filter(m=>m.id===state.model);
-  const garment=(await loadGarment(item)).blob;
-  let last=null, stage='';
-  progress(true,()=>stage);
-  try{
-    for(const model of order){
-      const t0=Date.now();
-      try{
-        stage='Connecting to '+model.label+'.';
-        const app=await connect(model), {handle_file}=await lib();
-        stage='Generating with '+model.label+'. Usually 30 to 60 seconds.';
-        const out=await model.run(app,handle_file,state.photo.blob,garment,item);
-        const remote=typeof out==='string'?out:(out&&out.url);
-        if(!remote) throw new Error('no image came back');
-        let blob=null;
-        try{
-          const r=await fetch(remote);
-          if(r.ok){
-            blob=await r.blob();
-            /* keep a JPEG, so the saved file opens in any editor */
-            const bmp=await createImageBitmap(blob), c=document.createElement('canvas');
-            c.width=bmp.width; c.height=bmp.height; c.getContext('2d').drawImage(bmp,0,0);
-            const jpg=await new Promise(res=>c.toBlob(res,'image/jpeg',0.95)); if(jpg) blob=jpg;
-          }
-        }catch(e){}
-        return {blob,url:blob?URL.createObjectURL(blob):remote,model:model.label,seconds:Math.round((Date.now()-t0)/1000)};
-      }catch(e){
-        last=e;
-        if((e&&e.code==='lib')||/quota/i.test(errText(e))) break;   /* the same limits apply to every model */
-      }
+/* try each model in turn; stop at once on a quota or library error, because the next model would hit the same wall */
+async function callFirst(models,stage,run){
+  let last=null;
+  for(const m of models){
+    const t0=Date.now();
+    try{
+      stage.text='Connecting to '+m.label+'.';
+      const app=await connect(m), {handle_file}=await lib();
+      stage.text=stage.verb+' with '+m.label+'. '+stage.hint;
+      const out=await run(m,app,handle_file);
+      return {out,model:m.label,seconds:Math.round((Date.now()-t0)/1000)};
+    }catch(e){
+      last=e;
+      if((e&&e.code==='lib')||/quota/i.test(errText(e))) break;
     }
-    throw last||new Error('no model available');
-  }finally{progress(false);}
+  }
+  throw last||new Error('no model available');
+}
+function remoteUrl(out){
+  if(!out) return '';
+  if(typeof out==='string') return out;
+  return out.url||(out.video&&(out.video.url||out.video))||(out.image&&out.image.url)||'';
+}
+async function fetchJpeg(remote){
+  /* keep a JPEG, so the saved file opens in any editor and can be passed on to the next model */
+  try{
+    const r=await fetch(remote); if(!r.ok) return null;
+    const raw=await r.blob(), bmp=await createImageBitmap(raw), c=document.createElement('canvas');
+    c.width=bmp.width; c.height=bmp.height; c.getContext('2d').drawImage(bmp,0,0);
+    return (await new Promise(res=>c.toBlob(res,'image/jpeg',0.95)))||raw;
+  }catch(e){return null;}
+}
+async function tryOnOnce(item,person,stage){
+  const garment=(await loadGarment(item)).blob;
+  const order=state.model==='auto'?TRYON:TRYON.filter(m=>m.id===state.model);
+  const r=await callFirst(order,stage,(m,app,file)=>m.run(app,file,person,garment,item));
+  const remote=remoteUrl(r.out); if(!remote) throw new Error('no image came back');
+  const blob=await fetchJpeg(remote);
+  return {blob,url:blob?URL.createObjectURL(blob):remote,model:r.model,seconds:r.seconds};
 }
 function failureCopy(e){
   const t=errText(e), hasToken=!!store.get('fr.hfToken');
   if(e&&e.code==='lib') return 'The AI library could not be loaded. Check your internet connection and try again.';
-  if(/quota/i.test(t)) return hasToken?'Your free Hugging Face allowance for today is used up. It refills within a day.':'The shared free allowance is used up. Open AI settings and add a free Hugging Face token for your own daily allowance, or try again later.';
-  if(/garment|photo \d+/i.test(t)&&!/hf|space/i.test(t)) return 'The product photograph could not be loaded. Check your connection and try again.';
-  return 'The free AI model did not answer'+(t?' ('+t.slice(0,140)+')':'')+'. It can be busy. Wait a minute and try again, or pick another model under AI settings.';
+  if(/quota/i.test(t)) return (hasToken?'Your free Hugging Face allowance for today is used up. It refills within a day, and everything you already made still opens.':'The shared free allowance is used up (about three images a day). Add your free Hugging Face token under AI settings, just below, for your own daily allowance.')+' Hugging Face said: '+t.replace(/<[^>]+>/g,'').slice(0,140);
+  if(/^photo \d+/i.test(t)) return 'The product photograph could not be loaded. Check your connection and try again.';
+  return 'The free AI model did not answer'+(t?' ('+t.slice(0,160)+')':'')+'. It can be busy. Wait a minute and try again.';
 }
-async function tryOn(fresh){
-  if(state.busy) return;
-  const item=BY_ID[state.item];
-  if(!state.photo){setStatus('Upload a photo of yourself first.'); $('photo-btn').focus(); $('photo-btn').scrollIntoView({block:'center'}); return;}
+function ready(){
+  if(state.busy) return false;
+  if(!state.photo){setStatus('Upload a photo of yourself first.'); $('photo-btn').focus(); $('photo-btn').scrollIntoView({block:'center'}); return false;}
+  if(!$('chk-consent').checked){setStatus('Tick the box under your photo to agree to send it to the AI models.'); $('chk-consent').focus(); $('chk-consent').scrollIntoView({block:'center'}); return false;}
+  return true;
+}
+async function busy(expect,fn){
+  const stage={text:'',verb:'Generating',hint:''};
+  state.busy=true; state.showOriginal=false; state.playClip=false; syncAll();
+  progress(true,()=>stage.text,expect); setStatus('Working. Keep this tab open.');
   $('mirror-wrap').scrollIntoView({block:'nearest'});
-  if(state.results[item.id]&&!fresh){state.showOriginal=false; $('chk-orig').checked=false; syncMirror(); setStatus('Showing the image made earlier for this photo.'); return;}
-  const forPhoto=state.photo;
-  state.busy=true; state.showOriginal=true; syncMirror(); setStatus('Working. Keep this tab open.');
-  try{
-    const r=await generate(item);
-    if(state.photo!==forPhoto) return;
-    const old=state.results[item.id]; if(old&&old.blob) URL.revokeObjectURL(old.url);
-    state.results[item.id]=r;
-    if(r.blob) looksDb.put(forPhoto.hash+'|'+item.id,{blob:r.blob,model:r.model,seconds:r.seconds});
-    setStatus('Done. This is an AI-generated image of you in the '+item.name+'.');
-  }catch(e){
-    if(state.photo===forPhoto) setStatus(failureCopy(e));
-    if(e&&!(e.code)) console.warn('try-on failed',e);
-  }finally{
-    state.busy=false; state.showOriginal=false; $('chk-orig').checked=false;
-    renderPieces(); renderLooks(); syncMirror();
+  try{await fn(stage); return true;}
+  catch(e){
+    setStatus(failureCopy(e)); console.warn('fitting room',e);
+    if(/quota/i.test(errText(e))&&!store.get('fr.hfToken')){$('settings').open=true; setTimeout(()=>$('settings').scrollIntoView({block:'center'}),50);}
+    return false;
   }
+  finally{progress(false); state.busy=false; syncAll();}
+}
+
+/* the base try-on: you in the piece, in your recommended size */
+async function actTryOn(fresh){
+  const item=BY_ID[state.item], baseKey=item.id+'|base';
+  if(state.view!=='item'){selectItem(state.item);}
+  if(!ready()) return;
+  const size=sizeOf(item), d=stepsFromRec(item,size);
+  if(state.looks[baseKey]&&!fresh){
+    state.showOriginal=false; syncAll(); $('mirror-wrap').scrollIntoView({block:'nearest'});
+    if(d!==0&&!state.looks[curKey()]) sizeHint(); else setStatus('Showing the image made earlier for this photo.');
+    return;
+  }
+  if(fresh&&d!==0&&state.looks[baseKey]) return actSize();
+  await busy(45,async stage=>{
+    stage.verb='Generating'; stage.hint='Usually 30 to 60 seconds.';
+    const r=await tryOnOnce(item,state.photo.blob,stage);
+    for(const k of ['d-2','d-1','d1','d2']) dropLook(item.id+'|'+k);   /* size redraws belong to the old image */
+    saveLook(baseKey,r);
+    setStatus('Done. This is an AI-generated image of you in the '+item.name+'.'+(d!==0?' Press See size '+size+' on me to redraw it in that size.':''));
+  });
+}
+/* a second AI pass redraws the base image looser or tighter for the chosen size */
+async function actSize(){
+  const item=BY_ID[state.item], size=sizeOf(item), d=clamp(stepsFromRec(item,size),-2,2), base=state.looks[item.id+'|base'];
+  if(!ready()||!base||!base.blob||d===0) return;
+  await busy(25,async stage=>{
+    stage.verb='Redrawing size '+size; stage.hint='Usually under 30 seconds.';
+    const bmp=await createImageBitmap(base.blob), k=1024/Math.max(bmp.width,bmp.height);
+    const w=clamp(Math.round(bmp.width*k/8)*8,256,1024), h=clamp(Math.round(bmp.height*k/8)*8,256,1024);
+    const prompt='Change only the fit of the '+item.desc+' the person is wearing so that it looks '+FIT_PHRASE[String(d)]+'. Keep the colour, fabric and design of the garment. Keep the person\'s face, hair, body, pose, other clothes, the lighting and the background exactly the same. Photorealistic.';
+    const r=await callFirst(EDITORS,stage,(m,app,file)=>app.predict(m.ep,[prompt,[{image:file(base.blob),caption:null}],'Distilled (4 steps)',42,false,w,h,4,1,false]).then(x=>x.data[0]));
+    const remote=remoteUrl(r.out); if(!remote) throw new Error('no image came back');
+    const blob=await fetchJpeg(remote);
+    saveLook(itemKey(item,size),{blob,url:blob?URL.createObjectURL(blob):remote,model:r.model,seconds:r.seconds});
+    setStatus('Done. An AI illustration of how size '+size+' would sit on you.');
+  });
+}
+/* a video model animates the look on show */
+async function actClip(){
+  const key=curKey(), look=state.looks[key];
+  if(!ready()||!look||!look.blob) return;
+  const what=state.view==='outfit'?'outfit':BY_ID[state.item].desc;
+  await busy(60,async stage=>{
+    stage.verb='Filming the runway clip'; stage.hint='Usually about a minute.';
+    const prompt='The person stays in place and gently turns their shoulders from side to side like a model showing an outfit, with natural small movements. The fabric of the '+what+' moves and drapes realistically. Fixed camera, same background, photorealistic.';
+    const r=await callFirst(VIDEO,stage,(m,app,file)=>app.predict(m.ep,[file(look.blob),prompt,4,VIDEO_NEGATIVE,3,1,1,42,false]).then(x=>x.data[0]));
+    const remote=remoteUrl(r.out); if(!remote) throw new Error('no clip came back');
+    let blob=null; try{const f=await fetch(remote); if(f.ok) blob=await f.blob();}catch(e){}
+    if(look.clip) URL.revokeObjectURL(look.clip.url);
+    look.clip={blob,url:blob?URL.createObjectURL(blob):remote,model:r.model};
+    if(blob) looksDb.put(state.photo.hash+'|'+key+'|clip',{blob,model:r.model});
+    setStatus('Done. An AI-generated clip of the look moving.');
+  }).then(ok=>{if(ok){state.playClip=true; syncAll();}});
+}
+/* the stylist's outfit: the try-on model dresses the first piece, then the image editor layers the rest over it */
+async function layerOutfit(base,pieces,stage){
+  const bmp=await createImageBitmap(base), k=1024/Math.max(bmp.width,bmp.height);
+  const w=clamp(Math.round(bmp.width*k/8)*8,256,1024), h=clamp(Math.round(bmp.height*k/8)*8,256,1024);
+  const garments=[]; for(const p of pieces.slice(1)) garments.push((await loadGarment(p.item)).blob);
+  const parts=[]; let under=pieces[0].item.desc;
+  pieces.slice(1).forEach((p,i)=>{parts.push('the '+p.item.desc+' from image '+(i+2)+', '+(p.item.wear||'worn over')+' the '+under); under=p.item.desc;});
+  const prompt='Dress the person in image 1 in '+parts.join(', and ')+'. Keep the '+pieces[0].item.desc+' they are already wearing visible where it would show. Keep the person\'s face, hair, body, pose, trousers, the lighting and the background exactly the same. Photorealistic.';
+  const r=await callFirst(EDITORS,stage,(m,app,file)=>app.predict(m.ep,[prompt,[base].concat(garments).map(g=>({image:file(g),caption:null})),'Distilled (4 steps)',42,false,w,h,4,1,false]).then(x=>x.data[0]));
+  const remote=remoteUrl(r.out); if(!remote) throw new Error('no image came back');
+  const blob=await fetchJpeg(remote);
+  return {blob,url:blob?URL.createObjectURL(blob):remote,model:r.model,seconds:r.seconds};
+}
+async function actOutfit(fresh){
+  const plan=state.plan; if(!plan||!plan.pick) return;
+  const pcs=plan.pick.pieces, ids=pcs.map(p=>p.item.id), key='outfit|'+ids.join('+');
+  if(!ready()){$('prop-status').textContent=$('status').textContent; return;}
+  state.view='outfit'; state.outfit=ids;
+  $('mirror-wrap').scrollIntoView({block:'start'});
+  if(state.looks[key]&&fresh!==true){syncAll(); setStatus('Showing the outfit made earlier for this photo.'); $('prop-status').textContent=$('status').textContent; return;}
+  await busy(45+25,async stage=>{
+    const firstKey=pcs[0].item.id+'|base'; let first=state.looks[firstKey], secs=0;
+    if(!first||!first.blob){
+      stage.verb='Dressing piece 1 of '+pcs.length; stage.hint='Usually 30 to 60 seconds.';
+      first=await tryOnOnce(pcs[0].item,state.photo.blob,stage); secs+=first.seconds;
+      if(!first.blob) throw new Error('could not pass the image to the next step');
+      saveLook(firstKey,first);
+    }
+    let done=null;
+    try{
+      stage.verb='Layering the outfit'; stage.hint='Usually under 30 seconds.';
+      done=await layerOutfit(first.blob,pcs,stage);
+    }catch(e){
+      if((e&&e.code==='lib')||/quota/i.test(errText(e))) throw e;
+      /* the editor is down: put each remaining piece on with the try-on model instead */
+      let person=first.blob;
+      for(let n=1;n<pcs.length;n++){
+        stage.verb='Dressing piece '+(n+1)+' of '+pcs.length; stage.hint='Usually 30 to 60 seconds.';
+        if(done&&done.blob) URL.revokeObjectURL(done.url);
+        done=await tryOnOnce(pcs[n].item,person,stage);
+        if(n<pcs.length-1&&!done.blob) throw new Error('could not pass the image to the next step');
+        person=done.blob;
+      }
+    }
+    secs+=done.seconds;
+    saveLook(key,{blob:done.blob,url:done.url,model:done.model,seconds:secs});
+    setStatus('Done. This is an AI-generated image of you in the outfit.');
+  });
+  $('prop-status').textContent=$('status').textContent;
+}
+
+/* ---------------------------------------------------------------- share and save */
+async function labelled(blob){
+  /* every image that leaves the page says it is AI-generated */
+  const bmp=await createImageBitmap(blob), c=document.createElement('canvas'); c.width=bmp.width; c.height=bmp.height;
+  const g=c.getContext('2d'); g.drawImage(bmp,0,0);
+  const bar=Math.max(22,Math.round(bmp.height*0.034));
+  g.fillStyle='rgba(0,0,0,.62)'; g.fillRect(0,bmp.height-bar,bmp.width,bar);
+  g.fillStyle='#fff'; g.font=Math.round(bar*0.46)+'px Arial, sans-serif'; g.textBaseline='middle';
+  g.fillText('AI-GENERATED PREVIEW · THE FITTING ROOM CONCEPT',Math.round(bar*0.5),bmp.height-bar/2);
+  return new Promise(res=>c.toBlob(res,'image/jpeg',0.93));
+}
+async function currentFile(){
+  const look=state.looks[curKey()]; if(!look) return null;
+  const stem='fitting-room-'+curKey().replace(/[^a-z0-9]+/gi,'-');
+  if(look.clip&&state.playClip&&look.clip.blob) return new File([look.clip.blob],stem+'.mp4',{type:'video/mp4'});
+  if(!look.blob) return null;
+  return new File([await labelled(look.blob)],stem+'.jpg',{type:'image/jpeg'});
+}
+function download(file){
+  const u=URL.createObjectURL(file), a=el('a',{href:u,download:file.name}); document.body.append(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(u),4000);
+}
+async function actSave(){
+  const f=await currentFile();
+  if(!f){const look=state.looks[curKey()]; if(look) window.open(look.url,'_blank','noopener'); return;}
+  download(f); setStatus('Saved '+f.name+'.');
+}
+async function actShare(){
+  const f=await currentFile(); if(!f){setStatus('Nothing to share yet.'); return;}
+  if(navigator.canShare&&navigator.canShare({files:[f]})){
+    try{await navigator.share({files:[f],title:'The Fitting Room',text:'AI-generated preview from The Fitting Room concept.'}); setStatus('Shared.');}
+    catch(e){if(!e||e.name!=='AbortError') setStatus('Sharing did not work here. Use Save instead.');}
+  }else{download(f); setStatus('This browser cannot share files, so it was saved instead. Sharing works on most phones.');}
+}
+
+/* ---------------------------------------------------------------- stylist agent (rules stand in for the agent's reasoning) */
+function resolvePiece(item){
+  const want=recSize(item);
+  if(item.stock[want]>0) return {item,size:want,note:''};
+  const up=TOP_SIZES[idx(want)+1];
+  if(up&&item.stock[up]>0){
+    const v=verdictOf(item,up);
+    if(v.code==='regular'||v.code==='relaxed') return {item,size:up,note:'Size '+want+' is out of stock, so '+up+' goes in: '+v.label.toLowerCase()+'.'};
+  }
+  return null;
+}
+function makePlan(){
+  const occ=state.occasion, budget=state.budget, steps=[];
+  steps.push('Read your brief: '+OCCASIONS[occ].toLowerCase()+', £'+budget+' budget, usual size '+state.top+', '+state.height+' cm.');
+  const B=ITEMS.filter(i=>i.role==='base'), M=ITEMS.filter(i=>i.role==='mid'), O=ITEMS.filter(i=>i.role==='outer'), combos=[];
+  for(const b of B){ for(const m of M) combos.push([b,m]); for(const o of O) combos.push([b,o]); for(const m of M) for(const o of O) combos.push([b,m,o]); }
+  steps.push('Searched the collection: '+ITEMS.length+' pieces make '+combos.length+' possible outfits.');
+  const runs=ITEMS.filter(i=>i.runs!==0).map(i=>i.name+' runs '+(i.runs>0?'small':'large')+', so size '+recSize(i));
+  steps.push('Checked fit data for your size. '+(runs.length?runs.join('. ')+'.':'Every piece is true to size.'));
+  const res={}, notes=[];
+  for(const i of ITEMS){
+    res[i.id]=resolvePiece(i);
+    if(!res[i.id]) notes.push(i.name+' is out of stock near your size, so it is left out.');
+    else if(res[i.id].note) notes.push(i.name+': '+res[i.id].note.charAt(0).toLowerCase()+res[i.id].note.slice(1));
+  }
+  steps.push('Checked stock in your sizes. '+(notes.length?notes.join(' '):'Everything is in stock.'));
+  const options=combos.filter(c=>c.every(i=>res[i.id])).map(c=>{
+    const pieces=c.map(i=>res[i.id]), total=c.reduce((s,i)=>s+i.price,0);
+    let score=c.reduce((s,i)=>s+i.occ[occ],0)-pieces.filter(p=>p.note).length*0.5;
+    if(c.length===3) score+=occ==='cold'?2:-1;
+    return {pieces,total,score};
+  });
+  const inBudget=options.filter(o=>o.total<=budget).sort((x,y)=>y.score-x.score||x.total-y.total);
+  steps.push('Applied your budget: '+inBudget.length+' of '+options.length+' outfits cost £'+budget+' or less.');
+  if(!inBudget.length){
+    const cheapest=options.length?Math.min(...options.map(o=>o.total)):0;
+    steps.push('Stopped. Nothing fits the budget'+(cheapest?': the cheapest outfit is £'+cheapest+'. Raise the budget and plan again.':'.'));
+    return {steps,pick:null,count:0};
+  }
+  const n=state.planIndex%inBudget.length, pick=inBudget[n];
+  steps.push('Chose '+(n===0?'the best match':'option '+(n+1)+' of '+inBudget.length)+' for '+OCCASIONS[occ].toLowerCase()+': '+pick.pieces.map(p=>p.item.name).join(' + ')+', £'+pick.total+'.');
+  steps.push('Held a delivery slot: free collection from your local store, tomorrow after 12:00.');
+  steps.push('Stopped for your approval. Nothing is ordered or charged until you approve.');
+  return {steps,pick,count:inBudget.length};
+}
+let planRun=0;
+function renderPlan(animate){
+  const run=++planRun, plan=state.plan=makePlan(), ol=$('trace'), prop=$('proposal');
+  state.approved=false; ol.textContent=''; prop.hidden=true;
+  const still=!animate||(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches);
+  const finish=()=>{
+    if(run!==planRun) return;
+    if(!plan.pick){prop.hidden=true; return;}
+    prop.hidden=false;
+    $('prop-title').textContent='Proposed outfit · '+OCCASIONS[state.occasion];
+    const ul=$('prop-items'); ul.textContent='';
+    for(const p of plan.pick.pieces){
+      const li=el('li'), txt=el('div');
+      txt.append(el('p',null,p.item.name+', '+p.item.colour),el('p',{class:'help'},'Size '+p.size+' · '+verdictOf(p.item,p.size).label+(p.note?' · '+p.note:' · In stock')));
+      li.append(el('img',{src:pexelsUrl(p.item.pexels,200),alt:'',style:'object-position:'+focus(p.item)}),txt,el('span',null,'£'+p.item.price));
+      ul.append(li);
+    }
+    const dl=$('prop-totals'); dl.textContent='';
+    for(const [k,v] of [['Total','£'+plan.pick.total+' of your £'+state.budget+' budget'],['Delivery','Free collection from your local store, tomorrow after 12:00'],['Returns','Free. The agent books them and passes them to customer service']]) dl.append(el('dt',null,k),el('dd',null,v));
+    $('prop-actions').hidden=false; $('prop-done').hidden=true; $('prop-next').hidden=plan.count<2;
+    $('prop-status').textContent='Waiting for you.';
+  };
+  plan.steps.forEach((s,i)=>{
+    const add=()=>{if(run!==planRun) return; ol.append(el('li',null,s)); if(i===plan.steps.length-1) finish();};
+    if(still) add(); else setTimeout(add,i*550);
+  });
+}
+function approve(){
+  const plan=state.plan; if(!plan||!plan.pick) return;
+  state.approved=true;
+  $('prop-actions').hidden=true; $('prop-done').hidden=false; $('prop-status').textContent='';
+  $('done-text').textContent='You approved '+plan.pick.pieces.map(p=>p.item.name+' ('+p.size+')').join(' and ')+' for £'+plan.pick.total+'. This is a demo, so nothing was bought or charged. In the live service the agent would now place the order and book the collection.';
+  const sel=$('ret-piece'); sel.textContent='';
+  for(const p of plan.pick.pieces) sel.append(el('option',{value:p.item.id},p.item.name));
+  $('ret-out').textContent='';
+  const li=el('li',null,'You approved. Order placed and collection booked (demo only).'); $('trace').append(li);
+}
+function bookReturn(){
+  const item=BY_ID[$('ret-piece').value], reason=$('ret-reason').value; if(!item) return;
+  const p=state.plan.pick.pieces.find(x=>x.item.id===item.id), i=idx(p.size);
+  const swap=reason==='Too small'?TOP_SIZES[i+1]:reason==='Too big'?TOP_SIZES[i-1]:null;
+  const offer=swap?(item.stock[swap]>0?' Size '+swap+' is in stock, so the agent offers a swap.':' Size '+swap+' is out of stock, so the agent offers a refund.'):' The agent offers a refund.';
+  $('ret-out').textContent='Return booked for the '+item.name+': free drop-off at your local store.'+offer+' The reason "'+reason.toLowerCase()+'" is logged against size '+p.size+' and feeds the fit advice for this piece. Customer service takes it from here. Demo only.';
+  $('trace').append(el('li',null,'Booked a return for the '+item.name+' ('+reason.toLowerCase()+') and handed it to customer service.'));
 }
 
 /* ---------------------------------------------------------------- events */
@@ -625,43 +1016,74 @@ function offline(what){
   if(offlineShown) return; offlineShown=true;
   const n=el('p',{class:'offline',role:'alert'});
   n.textContent=what==='photos'
-    ?'The product photos could not load. This page needs an internet connection and must be opened in Chrome, Edge, Safari or Firefox. A file preview (in the Claude app, Files or Quick Look) blocks it. Download the file, then open it in your browser.'
-    :'The AI try-on service could not be reached from here. Open this page in Chrome, Edge, Safari or Firefox with internet on. A file preview (in the Claude app, Files or Quick Look) blocks it.';
+    ?'The product photos could not load. This page needs an internet connection and must be opened in Chrome, Edge, Safari or Firefox. A file preview blocks it.'
+    :'The AI service could not be reached from here. Open this page in Chrome, Edge, Safari or Firefox with internet on. A file preview blocks it.';
   document.querySelector('.notice').after(n);
 }
 function init(){
   for(const s of TOP_SIZES) $('in-top').append(el('option',{value:s},s));
   $('in-top').value=state.top;
   $('in-model').append(el('option',{value:'auto'},'Automatic (recommended)'));
-  for(const m of MODELS) $('in-model').append(el('option',{value:m.id},m.label));
-  const savedModel=store.get('fr.model'); if(savedModel&&(savedModel==='auto'||MODELS.some(m=>m.id===savedModel))){state.model=savedModel;}
+  for(const m of TRYON) $('in-model').append(el('option',{value:m.id},m.label));
+  const savedModel=store.get('fr.model'); if(savedModel&&(savedModel==='auto'||TRYON.some(m=>m.id===savedModel))) state.model=savedModel;
   $('in-model').value=state.model;
-  renderGrid(); renderPieces(); renderFit(); renderLooks(); syncMirror(); syncToken();
+  for(const k in OCCASIONS) $('in-occasion').append(el('option',{value:k},OCCASIONS[k]));
+  $('in-occasion').value=state.occasion;
+  try{$('chk-consent').checked=sessionStorage.getItem('fr.consent')==='1';}catch(e){}
+  renderGrid(); syncAll(); syncToken(); renderPlan(false);
   lib().catch(()=>offline('ai'));
 
   $('photo-btn').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault(); $('photo-input').click();}});
   $('photo-input').addEventListener('change',e=>{loadPhoto(e.target.files&&e.target.files[0]); e.target.value='';});
   $('photo-remove').addEventListener('click',removePhoto);
+  $('chk-consent').addEventListener('change',e=>{try{sessionStorage.setItem('fr.consent',e.target.checked?'1':'0');}catch(x){} if(e.target.checked&&!state.busy) sizeHint();});
   const frame=$('frame');
   frame.addEventListener('dragover',e=>{e.preventDefault(); frame.classList.add('drop');});
   frame.addEventListener('dragleave',()=>frame.classList.remove('drop'));
   frame.addEventListener('drop',e=>{e.preventDefault(); frame.classList.remove('drop'); const f=e.dataTransfer&&e.dataTransfer.files&&e.dataTransfer.files[0]; if(f) loadPhoto(f);});
 
-  $('in-height').addEventListener('change',e=>{const v=Math.min(215,Math.max(140,Math.round(+e.target.value)||178)); e.target.value=String(v); state.height=v; renderFit();});
-  $('in-top').addEventListener('change',e=>{state.top=e.target.value; state.override={}; renderFit();});
+  $('in-height').addEventListener('change',e=>{const v=clamp(Math.round(+e.target.value)||178,140,215); e.target.value=String(v); state.height=v; syncAll(); renderPlan(false);});
+  $('in-top').addEventListener('change',e=>{state.top=e.target.value; state.override={}; state.planIndex=0; syncAll(); sizeHint(); renderPlan(false);});
   $('in-model').addEventListener('change',e=>{state.model=e.target.value; store.set('fr.model',state.model);});
 
-  $('try').addEventListener('click',()=>tryOn(false));
-  $('again').addEventListener('click',()=>tryOn(true));
-  $('chk-orig').addEventListener('change',e=>{state.showOriginal=e.target.checked; syncMirror();});
+  $('try').addEventListener('click',()=>actTryOn(false));
+  $('again').addEventListener('click',()=>{
+    if(state.view!=='outfit'){actTryOn(true); return;}
+    const pick=state.plan&&state.plan.pick;
+    if(pick&&state.outfit&&pick.pieces.map(p=>p.item.id).join('+')===state.outfit.join('+')) actOutfit(true);
+    else setStatus('To redo this outfit, plan it again in the stylist.');
+  });
+  $('size-go').addEventListener('click',actSize);
+  $('clip-go').addEventListener('click',actClip);
+  $('chk-clip').addEventListener('change',e=>{state.playClip=e.target.checked; if(state.playClip) state.showOriginal=false; syncMirror();});
+  $('chk-orig').addEventListener('change',e=>{state.showOriginal=e.target.checked; if(state.showOriginal) state.playClip=false; syncMirror();});
+  $('del-look').addEventListener('click',()=>{
+    if(state.busy) return;
+    const key=curKey(), look=state.looks[key]; if(!look) return;
+    if(look.clip&&state.playClip){URL.revokeObjectURL(look.clip.url); delete look.clip; looksDb.del(state.photo.hash+'|'+key+'|clip'); state.playClip=false; syncAll(); setStatus('Clip deleted from this browser.'); return;}
+    if(key.endsWith('|base')) for(const k of ['d-2','d-1','d1','d2']) dropLook(key.slice(0,-4)+k);
+    dropLook(key); if(key.endsWith('|base')) looksDb.del(state.photo.hash+'|'+key.slice(0,-5));
+    if(state.view==='outfit'){state.view='item'; state.outfit=null;}
+    syncAll(); setStatus('Image deleted from this browser.');
+  });
+  $('share').addEventListener('click',actShare);
+  $('save').addEventListener('click',actSave);
+
+  $('in-occasion').addEventListener('change',e=>{state.occasion=e.target.value; state.planIndex=0; renderPlan(false);});
+  $('in-budget').addEventListener('change',e=>{const v=clamp(Math.round(+e.target.value)||80,20,300); e.target.value=String(v); state.budget=v; state.planIndex=0; renderPlan(false);});
+  $('plan').addEventListener('click',()=>{state.planIndex=0; renderPlan(true);});
+  $('prop-next').addEventListener('click',()=>{state.planIndex++; renderPlan(true);});
+  $('prop-try').addEventListener('click',()=>actOutfit(false));
+  $('prop-approve').addEventListener('click',approve);
+  $('ret-go').addEventListener('click',bookReturn);
 
   $('token-save').addEventListener('click',()=>{
     const v=$('in-token').value.trim();
     if(!/^hf_[A-Za-z0-9]{20,}$/.test(v)){$('token-note').textContent='That does not look like a Hugging Face token. It starts with hf_ and comes from huggingface.co/settings/tokens.'; return;}
     store.set('fr.hfToken',v); $('in-token').value=''; syncToken();
-    $('token-note').textContent='Token saved in this browser. Try-ons now use your own Hugging Face allowance.';
+    $('token-note').textContent='Token saved in this browser. The AI models now use your own Hugging Face allowance.';
   });
-  $('token-clear').addEventListener('click',()=>{store.del('fr.hfToken'); syncToken(); $('token-note').textContent='Token forgotten. Try-ons use the shared anonymous allowance again.';});
+  $('token-clear').addEventListener('click',()=>{store.del('fr.hfToken'); syncToken(); $('token-note').textContent='Token forgotten. The AI models use the shared anonymous allowance again.';});
 }
 init();
 })();
